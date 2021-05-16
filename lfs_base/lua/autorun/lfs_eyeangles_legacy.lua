@@ -7,11 +7,11 @@ print( "  * EyeAngles do not use the ~20 degree deadspot" )
 print( "  * clientside EyeAngles are LOCAL TO VEHICLE again" )
 print( "  * this should restore functionality for all LFS vehicles + addons" )
 
- local meta = FindMetaTable( "Entity" )
+local meta = FindMetaTable( "Entity" )
  
- local Eye_Angles_OG = meta.EyeAngles
+local Eye_Angles_OG = meta.EyeAngles
 
- function meta:EyeAngles()
+function meta:EyeAngles()
 	if not isfunction( self.IsPlayer ) or not isfunction( self.LocalEyeAngles ) then return Eye_Angles_OG( self ) end -- safety check
 
 	if not self:IsPlayer() then return Eye_Angles_OG( self ) end
