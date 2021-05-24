@@ -6,7 +6,7 @@ local meta = FindMetaTable( "Player" )
 simfphys = istable( simfphys ) and simfphys or {} -- lets check if the simfphys table exists. if not, create it!
 simfphys.LFS = {} -- lets add another table for this project. We will be storing all our global functions and variables here. LFS means LunasFlightSchool
 
-simfphys.LFS.VERSION = 212 -- note to self: Workshop is 10-version increments ahead. (next workshop update at 224)
+simfphys.LFS.VERSION = 213 -- note to self: Workshop is 10-version increments ahead. (next workshop update at 224)
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 simfphys.LFS.KEYS_IN = {}
@@ -174,7 +174,11 @@ hook.Add( "OnEntityCreated", "!!!!lfsEntitySorter", function( ent )
 	timer.Simple( FrameTime(), function() 
 		if not IsValid( ent ) then return end
 
-		if isfunction( ent.IsNPC ) and ent:IsNPC() then table.insert( simfphys.LFS.NPCsStored, ent ) end
+		if isfunction( ent.IsNPC ) and ent:IsNPC() then
+			if ent:GetClass():lower() ~= "npc_fastzombie" then
+				table.insert( simfphys.LFS.NPCsStored, ent )
+			end
+		end
 
 		if ent.LFS then 
 			table.insert( simfphys.LFS.PlanesStored, ent )
