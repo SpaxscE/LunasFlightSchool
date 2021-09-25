@@ -70,6 +70,8 @@ function ENT:OnStopMaintenance()
 end
 
 function ENT:StartMaintenance()
+	if not simfphys.LFS.SelfRepair then return end
+
 	self.MaintenanceStart = CurTime()
 
 	self:OnStartMaintenance()

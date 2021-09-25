@@ -17,29 +17,19 @@ simfphys.LFS.NextPlanesGetAll = 0
 simfphys.LFS.NPCsStored = {}
 simfphys.LFS.NextNPCsGetAll = 0
 
-simfphys.LFS.cVar_IgnoreNPCs = CreateConVar( "lfs_ai_ignorenpcs", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"should LFS-AI and NPCs ignore each other?" )
+simfphys.LFS.cVar_IgnoreNPCs = CreateConVar( "lfs_ai_ignorenpcs", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"should LFS-AI ignore NPC's?" )
+simfphys.LFS.cVar_SelfRepair = CreateConVar( "lfs_selfrepair", "1", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"enable/disable self-repair/refil feature?" )
+
 simfphys.LFS.FreezeTeams = CreateConVar( "lfs_freeze_teams", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"enable/disable auto ai-team switching" )
 simfphys.LFS.TeamPassenger = CreateConVar( "lfs_teampassenger", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"only allow players of matching ai-team to enter the vehicle? 1 = team only, 0 = everyone can enter" )
 simfphys.LFS.PlayerDefaultTeam = CreateConVar( "lfs_default_teams", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"set default player ai-team" )
 
 simfphys.LFS.IgnoreNPCs = simfphys.LFS.cVar_IgnoreNPCs and simfphys.LFS.cVar_IgnoreNPCs:GetBool() or false
+simfphys.LFS.SelfRepair = simfphys.LFS.cVar_SelfRepair and simfphys.LFS.cVar_SelfRepair:GetBool() or false
 simfphys.LFS.IgnorePlayers = cVar_playerignore and cVar_playerignore:GetBool() or false
 
 simfphys.LFS.pSwitchKeys = {[KEY_1] = 1,[KEY_2] = 2,[KEY_3] = 3,[KEY_4] = 4,[KEY_5] = 5,[KEY_6] = 6,[KEY_7] = 7,[KEY_8] = 8,[KEY_9] = 9,[KEY_0] = 10}
 simfphys.LFS.pSwitchKeysInv = {[1] = KEY_1,[2] = KEY_2,[3] = KEY_3,[4] = KEY_4,[5] = KEY_5,[6] = KEY_6,[7] = KEY_7,[8] = KEY_8,[9] = KEY_9,[10] = KEY_0}
-
-simfphys.LFS.MaxBulletDistance = 7500
-simfphys.LFS.BulletMaxRange = CreateConVar( "lfs_bullet_max_range", "7500", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"set default player ai-team" )
-
-local EntityMeta = FindMetaTable("Entity")
-local OldFireBullets = EntityMeta.FireBullets
-function EntityMeta:FireBullets( bulletInfo, suppressHostEvents )
-	if self.LFS then
-		bulletInfo.Distance = math.min( (bulletInfo.Distance or simfphys.LFS.MaxBulletDistance), simfphys.LFS.MaxBulletDistance )
-	end
-
-	OldFireBullets( self, bulletInfo, suppressHostEvents )
-end
 
 function simfphys.LFS:AddKey(name, class, name_menu, default, cmd, IN_KEY)
 	table.insert( simfphys.LFS.KEYS_DEFAULT, {name = name, class = class, name_menu = name_menu, default = default, cmd = cmd, IN_KEY = IN_KEY} )
@@ -81,12 +71,7 @@ for _, v in pairs( DEFAULT_KEYS ) do
 	simfphys.LFS:AddKey( v.name, v.class,  v.name_menu, v.default, v.cmd, v.IN_KEY )
 end
 
-simfphys.LFS.NotificationVoices = {["RANDOM"] = "0",["LFSORIGINAL"] = "1",["Charles"] = "2",["Grace"] = "3",["Darren"] = "4",["Susan"] = "5",["Graham"] = "6",["Peter"] = "7",["Rachel"] = "8",["Gabriel"] = "9",["Gabriella"] = "10",["Rod"] = "11",["Mike"] = "12",["Sharon"] = "13",["Tim"] = "14",["Ryan"] = "15",["Tracy"] = "16",["Amanda"] = "17",["Selene"] = "18",["Audrey"] = "19"}
-
 function simfphys.LFS.CheckUpdates()
-	--http.Fetch("https://github.com/Blu-x92/LunasFlightSchool", function(contents,size) 
-	--local LatestVersion = tonumber( string.match( contents, "%s*(%d+)\n%s*</span>\n%s*commits" ) ) or 0  -- RIP OLD METHOD
-
 	http.Fetch("https://raw.githubusercontent.com/Blu-x92/LunasFlightSchool/master/lfs_base/lua/autorun/lfs_basescript.lua", function(contents,size) 
 		local LatestVersion = tonumber( string.match( string.match( contents, "simfphys.LFS.VERSION%s=%s%d+" ) , "%d+" ) ) or 0
 
@@ -102,10 +87,6 @@ function simfphys.LFS.CheckUpdates()
 				if CLIENT then 
 					timer.Simple(18, function() 
 						chat.AddText( Color( 255, 0, 0 ), "[LFS] a newer version is available!" )
-						surface.PlaySound( "lfs/notification/ding.ogg" )
-						timer.Simple(3, function() 
-							simfphys.LFS.PlayNotificationSound()
-						end )
 					end)
 				end
 			end
@@ -130,10 +111,10 @@ function simfphys.LFS.CheckUpdates()
 			draw.RoundedBox( 8, 1, 46, w-2, h-47, Color( 120, 120, 120, 255 ) )
 
 			draw.RoundedBox( 4, 1, 26, w-2, 36, Color( 120, 120, 120, 255 ) )
-			
+
 			draw.RoundedBox( 8, 0, 0, w, 25, Color( 127, 0, 0, 255 ) )
 			draw.SimpleText( "[LFS] - Notification", "LFS_FONT", 5, 11, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-			
+
 			surface.SetDrawColor( 255, 255, 255, 50 )
 			surface.SetMaterial( bgMat )
 			surface.DrawTexturedRect( 0, -50, w, w )
@@ -175,12 +156,14 @@ hook.Add( "OnEntityCreated", "!!!!lfsEntitySorter", function( ent )
 		if not IsValid( ent ) then return end
 
 		if isfunction( ent.IsNPC ) and ent:IsNPC() then
-			if ent:GetClass():lower() ~= "npc_fastzombie" then
-				table.insert( simfphys.LFS.NPCsStored, ent )
-			end
+			table.insert( simfphys.LFS.NPCsStored, ent )
 		end
 
 		if ent.LFS then 
+			if CLIENT and ent.PrintName then
+				language.Add( ent:GetClass(), ent.PrintName)
+			end
+
 			table.insert( simfphys.LFS.PlanesStored, ent )
 
 			if SERVER then
@@ -703,7 +686,6 @@ if CLIENT then
 	local cvarCamFocus = CreateClientConVar( "lfs_camerafocus", 0, true, false)
 	local cvarShowPlaneIdent = CreateClientConVar( "lfs_show_identifier", 1, true, false)
 	local cvarShowRollIndic = CreateClientConVar( "lfs_show_rollindicator", 0, true, false)
-	local cvarNotificationVoice = CreateClientConVar( "lfs_notification_voice", "RANDOM", true, false)
 	local cvarUnlockControls = CreateClientConVar( "lfs_hipster", 0, true, true)
 	local cvarDisableQMENU = CreateClientConVar( "lfs_qmenudisable", 1, true, false)
 	
@@ -818,16 +800,6 @@ if CLIENT then
 		end
 	end
 
-	function simfphys.LFS.PlayNotificationSound()
-		local soundfile = simfphys.LFS.NotificationVoices[GetConVar( "lfs_notification_voice" ):GetString()]
-
-		if soundfile == "0" or not soundfile then
-			surface.PlaySound( "lfs/notification/"..math.random(1,19)..".ogg" )
-		else
-			surface.PlaySound( "lfs/notification/"..soundfile..".ogg" )
-		end
-	end
-	
 	hook.Add("SpawnMenuOpen", "!!!lfsDisableSpawnmenu", function()
 		local ply = LocalPlayer() 
 		
@@ -1270,7 +1242,7 @@ if CLIENT then
 			DPanel:SetSize( 400, 175 )
 			DPanel.Paint = function(self, w, h ) 
 				draw.DrawText( "( -1 = Focus Mouse   1 = Focus Plane )", "LFS_FONT_PANEL", 20, 75, Color( 200, 200, 200, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-				draw.DrawText( "Update Notification Voice", "LFS_FONT_PANEL", 20, 105, Color( 200, 200, 200, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+				--draw.DrawText( "Update Notification Voice", "LFS_FONT_PANEL", 20, 105, Color( 200, 200, 200, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
 			end
 			Frame.CL_PANEL = DPanel
 			
@@ -1303,7 +1275,8 @@ if CLIENT then
 			CheckBox:SetConVar("lfs_show_rollindicator") 
 			CheckBox:SizeToContents()
 			CheckBox:SetPos( 180, 140 )
-			
+
+			--[[
 			local DComboBox = vgui.Create( "DComboBox", DPanel )
 			DComboBox:SetPos( 150, 105 )
 			DComboBox:SetSize( 100, 20 )
@@ -1312,7 +1285,7 @@ if CLIENT then
 			DComboBox.OnSelect = function( self, index, value )
 				cvarNotificationVoice:SetString( value ) 
 			end
-			
+
 			local DermaButton = vgui.Create( "DButton", DPanel )
 			DermaButton:SetText( "" )
 			DermaButton:SetPos( 260, 106 )
@@ -1322,7 +1295,8 @@ if CLIENT then
 				surface.SetMaterial( soundPreviewMat )
 				surface.DrawTexturedRect( 0, 0, w, h ) 
 			end
-			
+			]]
+
 			local DButton = vgui.Create("DPanel",DPanel)
 			DButton:SetText("")
 			DButton:SetPos(0,0)
@@ -1644,7 +1618,7 @@ if CLIENT then
 
 			local CheckBox = vgui.Create( "DCheckBoxLabel", DPanel )
 			CheckBox:SetPos( 20, 105 )
-			CheckBox:SetText( "LFS-AI and NPCs ignore each other" )
+			CheckBox:SetText( "LFS-AI ignore NPC's" )
 			CheckBox:SetValue( GetConVar( "lfs_ai_ignorenpcs" ):GetInt() )
 			CheckBox:SizeToContents()
 			function CheckBox:OnChange( val )
@@ -1654,18 +1628,15 @@ if CLIENT then
 				net.SendToServer()
 			end
 
-			local slider = vgui.Create( "DNumSlider", DPanel )
-			slider:SetPos( 20, 130 )
-			slider:SetSize( 300, 20 )
-			slider:SetText( "HitScan Max Range" )
-			slider:SetMin( 1500 )
-			slider:SetMax( 56756 )
-			slider:SetDecimals( 0 )
-			slider:SetConVar( "lfs_bullet_max_range" )
-			function slider:OnValueChanged( val )
+			local CheckBox = vgui.Create( "DCheckBoxLabel", DPanel )
+			CheckBox:SetPos( 20, 125 )
+			CheckBox:SetText( "Enable self-Repair/Refil on Vehicle shutdown" )
+			CheckBox:SetValue( GetConVar( "lfs_selfrepair" ):GetInt() )
+			CheckBox:SizeToContents()
+			function CheckBox:OnChange( val )
 				net.Start("lfs_admin_setconvar")
-					net.WriteString( "lfs_bullet_max_range" )
-					net.WriteString( tostring( val ) )
+					net.WriteString("lfs_selfrepair")
+					net.WriteString( tostring( val and 1 or 0 ) )
 				net.SendToServer()
 			end
 		end
@@ -1819,8 +1790,8 @@ cvars.AddChangeCallback( "lfs_ai_ignorenpcs", function( convar, oldValue, newVal
 	simfphys.LFS.IgnoreNPCs = tonumber( newValue ) ~=0
 end)
 
-cvars.AddChangeCallback( "lfs_bullet_max_range", function( convar, oldValue, newValue ) 
-	simfphys.LFS.MaxBulletDistance = tonumber( newValue )
+cvars.AddChangeCallback( "lfs_selfrepair", function( convar, oldValue, newValue ) 
+	simfphys.LFS.SelfRepair = tonumber( newValue ) ~=0
 end)
 
 hook.Add( "InitPostEntity", "!!!lfscheckupdates", function()
