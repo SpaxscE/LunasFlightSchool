@@ -6,7 +6,7 @@ local meta = FindMetaTable( "Player" )
 simfphys = istable( simfphys ) and simfphys or {} -- lets check if the simfphys table exists. if not, create it!
 simfphys.LFS = {} -- lets add another table for this project. We will be storing all our global functions and variables here. LFS means LunasFlightSchool
 
-simfphys.LFS.VERSION = 213 -- note to self: Workshop is 10-version increments ahead. (next workshop update at 224)
+simfphys.LFS.VERSION = 214 -- note to self: Workshop is 10-version increments ahead. (next workshop update at 224)
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 simfphys.LFS.KEYS_IN = {}
@@ -18,7 +18,7 @@ simfphys.LFS.NPCsStored = {}
 simfphys.LFS.NextNPCsGetAll = 0
 
 simfphys.LFS.cVar_IgnoreNPCs = CreateConVar( "lfs_ai_ignorenpcs", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"should LFS-AI ignore NPC's?" )
-simfphys.LFS.cVar_SelfRepair = CreateConVar( "lfs_selfrepair", "1", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"enable/disable self-repair/refil feature?" )
+simfphys.LFS.cVar_SelfRepair = CreateConVar( "lfs_allow_selfrepair", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"enable/disable self-repair/refil feature?" )
 
 simfphys.LFS.FreezeTeams = CreateConVar( "lfs_freeze_teams", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"enable/disable auto ai-team switching" )
 simfphys.LFS.TeamPassenger = CreateConVar( "lfs_teampassenger", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"only allow players of matching ai-team to enter the vehicle? 1 = team only, 0 = everyone can enter" )
@@ -1631,11 +1631,11 @@ if CLIENT then
 			local CheckBox = vgui.Create( "DCheckBoxLabel", DPanel )
 			CheckBox:SetPos( 20, 125 )
 			CheckBox:SetText( "Enable self-Repair/Refil on Vehicle shutdown" )
-			CheckBox:SetValue( GetConVar( "lfs_selfrepair" ):GetInt() )
+			CheckBox:SetValue( GetConVar( "lfs_allow_selfrepair" ):GetInt() )
 			CheckBox:SizeToContents()
 			function CheckBox:OnChange( val )
 				net.Start("lfs_admin_setconvar")
-					net.WriteString("lfs_selfrepair")
+					net.WriteString("lfs_allow_selfrepair")
 					net.WriteString( tostring( val and 1 or 0 ) )
 				net.SendToServer()
 			end
@@ -1790,7 +1790,7 @@ cvars.AddChangeCallback( "lfs_ai_ignorenpcs", function( convar, oldValue, newVal
 	simfphys.LFS.IgnoreNPCs = tonumber( newValue ) ~=0
 end)
 
-cvars.AddChangeCallback( "lfs_selfrepair", function( convar, oldValue, newValue ) 
+cvars.AddChangeCallback( "lfs_allow_selfrepair", function( convar, oldValue, newValue ) 
 	simfphys.LFS.SelfRepair = tonumber( newValue ) ~=0
 end)
 
