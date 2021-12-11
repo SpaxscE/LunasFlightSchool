@@ -6,7 +6,7 @@ local meta = FindMetaTable( "Player" )
 simfphys = istable( simfphys ) and simfphys or {} -- lets check if the simfphys table exists. if not, create it!
 simfphys.LFS = {} -- lets add another table for this project. We will be storing all our global functions and variables here. LFS means LunasFlightSchool
 
-simfphys.LFS.VERSION = 214 -- note to self: Workshop is 10-version increments ahead. (next workshop update at 224)
+simfphys.LFS.VERSION = 300 -- note to self: Workshop is 10-version increments ahead. (next workshop update at 224)
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 simfphys.LFS.KEYS_IN = {}
@@ -682,7 +682,7 @@ if SERVER then
 end
 
 if CLIENT then
-	local cvarVolume = CreateClientConVar( "lfs_volume", 1, true, false)
+	local cvarVolume = CreateClientConVar( "lfs_volume", 0.65, true, false)
 	local cvarCamFocus = CreateClientConVar( "lfs_camerafocus", 0, true, false)
 	local cvarShowPlaneIdent = CreateClientConVar( "lfs_show_identifier", 1, true, false)
 	local cvarShowRollIndic = CreateClientConVar( "lfs_show_rollindicator", 0, true, false)
@@ -1669,7 +1669,7 @@ if CLIENT then
 				surface.SetMaterial( bgMat )
 				surface.DrawTexturedRect( 0, -50, w, w )
 
-				draw.DrawText( "v"..simfphys.LFS.GetVersion()..simfphys.LFS.VERSION_TYPE, "LFS_FONT_PANEL", w - 15, h - 20, Color( 200, 200, 200, 255 ), TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM )
+				draw.DrawText( "v"..simfphys.LFS.GetVersion()..simfphys.LFS.VERSION_TYPE, "LFS_FONT_PANEL", w - 15, h - 20, Color( 255, 191, 0, 255 ), TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM )
 			end
 			simfphys.LFS.OpenClientSettings( Frame )
 			
