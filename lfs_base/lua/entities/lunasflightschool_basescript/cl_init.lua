@@ -312,6 +312,7 @@ function ENT:CheckEngineState()
 		local LimitRPM = self:GetLimitRPM()
 
 		local ply = LocalPlayer()
+		local ViewEnt = ply:GetViewEntity()
 
 		local Vel = self:GetVelocity()
 
@@ -328,7 +329,9 @@ function ENT:CheckEngineState()
 					self.NextSound_flyby = CurTime() + 2
 
 					if Vel:Length() > self:GetMaxVelocity() * 0.6 and self:GetThrottlePercent() > 50 then
-						self:PlayFlybySND()
+						if ply:lfsGetPlane() ~= self then
+							self:PlayFlybySND()
+						end
 					end
 				end
 			end
@@ -336,7 +339,7 @@ function ENT:CheckEngineState()
 
 		local tPer = RPM / LimitRPM
 
-		local CurDist = (ply:GetViewEntity():GetPos() - self:GetPos()):Length()
+		local CurDist = (ViewEnt:GetPos() - self:GetPos()):Length()
 		self.PitchOffset = self.PitchOffset and self.PitchOffset + (math.Clamp((CurDist - self.OldDist) / FrameTime() / 125,-40,20 *  tPer) - self.PitchOffset) * FrameTime() * 5 or 0
 		self.OldDist = CurDist
 
