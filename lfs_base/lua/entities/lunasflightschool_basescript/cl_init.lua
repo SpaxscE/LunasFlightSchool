@@ -82,6 +82,76 @@ function ENT:LFSHudPaintCrosshair( HitPlane, HitPilot )
 	surface.DrawLine( HitPlane.x + 1, HitPlane.y + 11, HitPlane.x + 1, HitPlane.y + 21 ) 
 	surface.DrawLine( HitPlane.x + 1, HitPlane.y - 19, HitPlane.x + 1, HitPlane.y - 16 ) 
 	simfphys.LFS.DrawCircle( HitPilot.x + 1, HitPilot.y + 1, 34 )
+
+	self:LFSPaintHitMarker( HitPlane )
+end
+
+function ENT:LFSPaintHitMarker( scr )
+	local aV = math.sin( math.rad( math.sin( math.rad( math.max(((self:GetHitMarker() - CurTime()) / 0.15) * 90,0) ) ) * 90 ) )
+	if aV > 0.01 then
+		local Start = 15 + (1 - aV ^ 2) * 40
+		local dst = 10
+
+		surface.SetDrawColor( 255, 255, 0, 255 )
+		surface.DrawLine( scr.x + Start, scr.y + Start, scr.x + Start, scr.y + Start - dst )
+		surface.DrawLine( scr.x + Start, scr.y + Start, scr.x + Start - dst, scr.y + Start )
+
+		surface.DrawLine( scr.x + Start, scr.y - Start, scr.x + Start, scr.y - Start + dst )
+		surface.DrawLine( scr.x + Start, scr.y - Start, scr.x + Start - dst, scr.y - Start )
+
+		surface.DrawLine( scr.x - Start, scr.y + Start, scr.x - Start, scr.y + Start - dst )
+		surface.DrawLine( scr.x - Start, scr.y + Start, scr.x - Start + dst, scr.y + Start )
+
+		surface.DrawLine( scr.x - Start, scr.y - Start, scr.x - Start, scr.y - Start + dst )
+		surface.DrawLine( scr.x - Start, scr.y - Start, scr.x - Start + dst, scr.y - Start )
+	end
+
+	local aV = math.sin( math.rad( math.sin( math.rad( math.max(((self:GetKillMarker() - CurTime()) / 0.2) * 90,0) ) ) * 90 ) )
+	if aV > 0.01 then
+		surface.SetDrawColor( 255, 255, 255, 15 * (aV ^ 4) )
+		surface.DrawRect( 0, 0, ScrW(), ScrH() )
+
+		local Start = 10 + aV * 40
+		local End = 20 + aV * 45
+		surface.SetDrawColor( 255, 0, 0, 255 )
+		surface.DrawLine( scr.x + Start, scr.y + Start, scr.x + End, scr.y + End )
+		surface.DrawLine( scr.x - Start, scr.y + Start, scr.x - End, scr.y + End ) 
+		surface.DrawLine( scr.x + Start, scr.y - Start, scr.x + End, scr.y - End )
+		surface.DrawLine( scr.x - Start, scr.y - Start, scr.x - End, scr.y - End ) 
+
+		draw.NoTexture()
+		surface.DrawTexturedRectRotated( scr.x + Start, scr.y + Start, 5, 20, 45 )
+		surface.DrawTexturedRectRotated( scr.x - Start, scr.y + Start, 20, 5, 45 )
+		surface.DrawTexturedRectRotated(  scr.x + Start, scr.y - Start, 20, 5, 45 )
+		surface.DrawTexturedRectRotated( scr.x - Start, scr.y - Start, 5, 20, 45 )
+	end
+end
+
+function ENT:HitMarker( LastHitMarker )
+	self.LastHitMarker = LastHitMarker
+
+	local ply = LocalPlayer()
+	ply:EmitSound( table.Random( {"physics/metal/metal_sheet_impact_bullet2.wav","physics/metal/metal_sheet_impact_hard2.wav","physics/metal/metal_sheet_impact_hard6.wav",} ), 140, 140, 0.3, CHAN_ITEM2 )
+end
+
+function ENT:GetHitMarker()
+	return self.LastHitMarker or 0
+end
+
+function ENT:KillMarker( LastKillMarker )
+	self.LastKillMarker = LastKillMarker
+
+	local ply = LocalPlayer()
+
+	util.ScreenShake( ply:GetPos(), 5, 5, 2, 50000 )
+
+	ply:EmitSound( table.Random( {"lfs/plane_preexp1.ogg","lfs/plane_preexp3.ogg"} ), 140, 100, 0.7, CHAN_WEAPON )
+
+	ply:EmitSound( "physics/metal/metal_solid_impact_bullet4.wav", 140, 255, 0.3, CHAN_VOICE )
+end
+
+function ENT:GetKillMarker()
+	return self.LastKillMarker or 0
 end
 
 local matHealth = Material( "lfs_repairmode_health.png" )
@@ -142,6 +212,7 @@ function ENT:LFSHudPaint( X, Y, data, ply )
 end
 
 function ENT:LFSHudPaintPassenger( X, Y, ply )
+	self:LFSPaintHitMarker( {x = X * 0.5, y = Y * 0.5} )
 end
 
 function ENT:Think()
@@ -185,6 +256,52 @@ function ENT:OnRemove()
 end
 
 function ENT:SoundStop()
+end
+
+function ENT:HandlePropellerSND( InputPitch, RPM, LoadStart, AddStart, RPMAdd, RPMSub )
+	AddStart = AddStart or 0.8
+	RPMAdd = RPMAdd or 0.25
+	RPMSub = RPMSub or 0.4
+	LoadStart =  LoadStart or 0.6
+
+	local MaxRPM = self:GetLimitRPM()
+	local PropFade = (RPM / MaxRPM) ^ 5
+	local Vel = self:GetVelocity():Length()
+	local MaxVel = self:GetMaxVelocity()
+
+	local Add = math.min( math.max(Vel - MaxVel * AddStart,0) / 300, 1 )
+	local Load = math.max( math.min(Vel, (MaxVel-Vel) / (MaxVel - MaxVel * LoadStart),1), 0) ^ 2
+
+	local Pitch = math.Clamp(InputPitch + (-Load * RPMSub + Add * RPMAdd) * PropFade,0,2.55)
+
+	if self.PROPELLER_A then
+		self.PROPELLER_A:ChangeVolume( Load * PropFade )
+	end
+
+	if self.PROPELLER_B then
+		self.PROPELLER_B:ChangeVolume( Add  * PropFade )
+	end
+
+	return Pitch
+end
+
+function ENT:RemovePropellerSND()
+	if self.PROPELLER_A then
+		self.PROPELLER_A:Stop()
+	end
+	if self.PROPELLER_B then
+		self.PROPELLER_B:Stop()
+	end
+end
+
+function ENT:AddPropellerSND( Pitch )
+	Pitch = Pitch or 100
+
+	self.PROPELLER_A = CreateSound( self, "LFS_PROPELLER" )
+	self.PROPELLER_A:PlayEx(0,Pitch)
+
+	self.PROPELLER_B = CreateSound( self, "LFS_PROPELLER_STRAIN" )
+	self.PROPELLER_B:PlayEx(0,Pitch)
 end
 
 function ENT:CheckEngineState()

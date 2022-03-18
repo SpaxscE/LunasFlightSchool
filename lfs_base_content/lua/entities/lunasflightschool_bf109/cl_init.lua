@@ -62,10 +62,12 @@ function ENT:ExhaustFX()
 end
 
 function ENT:CalcEngineSound( RPM, Pitch, Doppler )
+	Pitch = self:HandlePropellerSND( Pitch, RPM, 0.7,0.95,0.1,0.4 )
+
 	local Low = 500
 	local Mid = 700
 	local High = 950
-	
+
 	if self.RPM1 then
 		self.RPM1:ChangePitch( math.Clamp(100 + Pitch * 300 + Doppler,0,255) )
 		self.RPM1:ChangeVolume( RPM < Low and 1 or 0, 1.5 )
@@ -73,17 +75,17 @@ function ENT:CalcEngineSound( RPM, Pitch, Doppler )
 	
 	if self.RPM2 then
 		self.RPM2:ChangePitch(  math.Clamp(20 + Pitch * 270 + Doppler,0,255) )
-		self.RPM2:ChangeVolume( (RPM >= Low and RPM < Mid) and 1 or 0, 1.5 )
+		self.RPM2:ChangeVolume( (RPM >= Low and RPM < Mid) and 1 or 0, 1.5)
 	end
 	
 	if self.RPM3 then
 		self.RPM3:ChangePitch(  math.Clamp(60 + Pitch * 110 + Doppler,0,255) )
-		self.RPM3:ChangeVolume( (RPM >= Mid and RPM < High) and 1 or 0, 1.5 )
+		self.RPM3:ChangeVolume( (RPM >= Mid and RPM < High) and 1 or 0, 1.5)
 	end
 	
 	if self.RPM4 then
 		self.RPM4:ChangePitch(  math.Clamp(75 + Pitch * 50 + Doppler,0,255) )
-		self.RPM4:ChangeVolume( RPM >= High and 1 or 0, 1.5 )
+		self.RPM4:ChangeVolume( RPM >= High and 1 or 0, 1.5) 
 	end
 	
 	if self.DIST then
@@ -108,6 +110,8 @@ function ENT:EngineActiveChanged( bActive )
 		
 		self.DIST = CreateSound( self, "LFS_BF109_DIST" )
 		self.DIST:PlayEx(0,0)
+
+		self:AddPropellerSND()
 	else
 		self:SoundStop()
 	end
@@ -129,6 +133,7 @@ function ENT:SoundStop()
 	if self.DIST then
 		self.DIST:Stop()
 	end
+	self:RemovePropellerSND()
 end
 
 function ENT:AnimFins()

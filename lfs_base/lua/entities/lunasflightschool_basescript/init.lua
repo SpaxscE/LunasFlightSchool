@@ -70,8 +70,6 @@ function ENT:OnStopMaintenance()
 end
 
 function ENT:StartMaintenance()
-	if not simfphys.LFS.SelfRepair then return end
-
 	self.MaintenanceStart = CurTime()
 
 	self:OnStartMaintenance()
@@ -250,7 +248,7 @@ function ENT:CalcFlight()
 	
 	if IsValid( Driver ) then 
 		local EyeAngles = Pod:WorldToLocalAngles( Driver:EyeAngles() )
-		
+
 		if Driver:lfsGetInput( "FREELOOK" ) then
 			if isangle( self.StoredEyeAngles ) then
 				EyeAngles = self.StoredEyeAngles
@@ -258,16 +256,16 @@ function ENT:CalcFlight()
 		else
 			self.StoredEyeAngles = EyeAngles
 		end
-		
+
 		local LocalAngles = self:WorldToLocalAngles( EyeAngles )
-		
+
 		local Pitch_Up = Driver:lfsGetInput( "+PITCH" )
 		local Pitch_Dn = Driver:lfsGetInput( "-PITCH" )
 		local Yaw_R = Driver:lfsGetInput( "+YAW" )
 		local Yaw_L = Driver:lfsGetInput( "-YAW" )
 		local Roll_R = Driver:lfsGetInput( "+ROLL" )
 		local Roll_L = Driver:lfsGetInput( "-ROLL" ) 
-		
+
 		if not IsInVtolMode then
 			if Pitch_Up or Pitch_Dn then
 				EyeAngles = self:GetAngles()
@@ -279,7 +277,7 @@ function ENT:CalcFlight()
 				LocalAngles = Angle(X,0,0)
 			end
 		end
-		
+
 		if Yaw_R or Yaw_L then
 			EyeAngles = self:GetAngles()
 			
@@ -287,7 +285,7 @@ function ENT:CalcFlight()
 			
 			LocalAngles.y = (Yaw_R and -90 or 0) + (Yaw_L and 90 or 0)
 		end
-		
+
 		if Yaw_R or Yaw_L then
 			A = not Roll_R
 			D = not Roll_L
@@ -295,14 +293,14 @@ function ENT:CalcFlight()
 			A = Roll_L
 			D = Roll_R
 		end
-		
+
 		LocalAngPitch = LocalAngles.p
 		LocalAngYaw = LocalAngles.y
 		LocalAngRoll = LocalAngles.r + math.cos(CurTime()) * 2
-		
+
 		local EyeAngForward = EyeAngles:Forward()
 		local Forward = self:GetForward()
-		
+
 		AngDiff = math.deg( math.acos( math.Clamp( Forward:Dot(EyeAngForward) ,-1,1) ) )
 	else
 		local EyeAngles = self:GetAngles()
@@ -337,8 +335,22 @@ function ENT:CalcFlight()
 	local RollRate =  math.min(self:GetVelocity():Length() / math.min(self:GetMaxVelocity() * 0.5,3000),1)
 
 	RudderFadeOut = math.max(RudderFadeOut,1 - RollRate)
-	
-	local ManualRoll = (D and MaxRoll or 0) - (A and MaxRoll or 0)
+
+	local RollLeft = A and MaxRoll or 0
+	local RollRight = D and MaxRoll or 0
+
+	if (RollLeft + RollRight) == 0 then
+		self.m_smRoll = 0
+	else
+		self.m_smRoll = self.m_smRoll and self.m_smRoll + ((RollRight - RollLeft) - self.m_smRoll) * FrameTime() * 5 or 0
+
+		if (self.m_smRoll > 0 and RollLeft > 0) or (self.m_smRoll < 0 and RollRight > 0) then
+			self.m_smRoll = 0
+		end
+	end
+
+	local ManualRoll = self.m_smRoll
+
 	local AutoRoll = (-LocalAngYaw * 22 * RollRate + LocalAngRoll * 3.5 * RudderFadeOut) * WingFinFadeOut
 	local VtolRoll = math.Clamp(((D and 10 or 0) - (A and 10 or 0) - self:GetAngles().r) * 5, -MaxRoll, MaxRoll)
 
@@ -724,10 +736,8 @@ end
 function ENT:ToggleEngine()
 	if self:GetEngineActive() then
 		self:StopEngine()
-		self:StartMaintenance()
 	else
 		self:StartEngine()
-		self:StopMaintenance()
 	end
 end
 
@@ -1387,22 +1397,46 @@ function ENT:OnTakeDamage( dmginfo )
 			self:TakeShieldDamage( Damage )
 		else
 			sound.Play( Sound( table.Random( {"physics/metal/metal_sheet_impact_bullet2.wav","physics/metal/metal_sheet_impact_hard2.wav","physics/metal/metal_sheet_impact_hard6.wav",} ) ), dmgPos, SNDLVL_70dB)
-	
+
 			local effectdata = EffectData()
 				effectdata:SetOrigin( dmgPos )
 				effectdata:SetNormal( dmgNormal )
 			util.Effect( "MetalSpark", effectdata )
-			
+
 			self:SetHP( NewHealth )
+
+			if not self:IsDestroyed() then
+				local Attacker = dmginfo:GetAttacker() 
+
+				if IsValid( Attacker ) and Attacker:IsPlayer() then
+					net.Start( "lfs_hitmarker" )
+					net.Send( Attacker )
+				end
+			end
 		end
 	else
 		self:SetHP( NewHealth )
+
+		if not self:IsDestroyed() then
+			local Attacker = dmginfo:GetAttacker() 
+
+			if IsValid( Attacker ) and Attacker:IsPlayer() then
+				net.Start( "lfs_hitmarker" )
+				net.Send( Attacker )
+			end
+		end
 	end
 	
 	if NewHealth <= 0 and not (self:GetShield() > Damage and ShieldCanBlock) then
 		if not self:IsDestroyed() then
 			self.FinalAttacker = dmginfo:GetAttacker() 
 			self.FinalInflictor = dmginfo:GetInflictor()
+
+			local Attacker = self.FinalAttacker
+			if IsValid( Attacker ) and Attacker:IsPlayer() then
+				net.Start( "lfs_killmarker" )
+				net.Send( Attacker )
+			end
 
 			self:Destroy()
 			

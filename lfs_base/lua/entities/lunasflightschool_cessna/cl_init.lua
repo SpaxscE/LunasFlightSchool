@@ -23,6 +23,9 @@ function ENT:ExhaustFX()
 end
 
 function ENT:CalcEngineSound( RPM, Pitch, Doppler )
+
+	Pitch = self:HandlePropellerSND( Pitch, RPM )
+
 	local Low = 500
 	local Mid = 700
 	local High = 950
@@ -66,9 +69,11 @@ function ENT:EngineActiveChanged( bActive )
 		
 		self.RPM4 = CreateSound( self, "LFS_CESSNA_RPM4" )
 		self.RPM4:PlayEx(0,0)
-		
+
 		self.DIST = CreateSound( self, "LFS_CESSNA_DIST" )
 		self.DIST:PlayEx(0,0)
+
+		self:AddPropellerSND( 110 )
 	else
 		self:SoundStop()
 	end
@@ -91,10 +96,10 @@ function ENT:SoundStop()
 	if self.RPM4 then
 		self.RPM4:Stop()
 	end
-	
 	if self.DIST then
 		self.DIST:Stop()
 	end
+	self:RemovePropellerSND()
 end
 
 function ENT:AnimFins()

@@ -247,3 +247,19 @@ sound.Add( {
 	pitch = 100,
 	sound = {"lfs/plane_preexp1.ogg","lfs/plane_preexp2.ogg","lfs/plane_preexp3.ogg"}
 } )
+
+sound.Add( {
+	name = "LFS_PROPELLER",
+	channel = CHAN_VOICE,
+	volume = 1.0,
+	level = 80,
+	sound = "^lfs/cessna/propeller.wav"
+} )
+
+sound.Add( {
+	name = "LFS_PROPELLER_STRAIN",
+	channel = CHAN_VOICE2,
+	volume = 1.0,
+	level = 80,
+	sound = "^lfs/cessna/propeller_strain.wav"
+} )

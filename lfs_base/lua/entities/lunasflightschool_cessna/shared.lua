@@ -90,7 +90,7 @@ sound.Add( {
 sound.Add( {
 	name = "LFS_CESSNA_DIST",
 	channel = CHAN_STATIC,
-	volume = 1.0,
-	level = 125,
+	volume = 1,
+	level = 100,
 	sound = "^lfs/cessna/dist.wav"
 } )

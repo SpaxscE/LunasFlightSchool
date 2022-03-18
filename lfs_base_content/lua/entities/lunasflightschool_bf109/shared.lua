@@ -55,7 +55,7 @@ ENT.MaxSecondaryAmmo = 200
 sound.Add( {
 	name = "LFS_BF109_RPM1",
 	channel = CHAN_STATIC,
-	volume = 1.0,
+	volume = 0.8,
 	level = 125,
 	sound = "^lfs/bf109/rpm_1.wav"
 } )
@@ -63,7 +63,7 @@ sound.Add( {
 sound.Add( {
 	name = "LFS_BF109_RPM2",
 	channel = CHAN_STATIC,
-	volume = 1.0,
+	volume = 0.8,
 	level = 125,
 	sound = "^lfs/bf109/rpm_2.wav"
 } )
@@ -71,7 +71,7 @@ sound.Add( {
 sound.Add( {
 	name = "LFS_BF109_RPM3",
 	channel = CHAN_STATIC,
-	volume = 1.0,
+	volume = 0.8,
 	level = 125,
 	sound = "^lfs/bf109/rpm_3.wav"
 } )
@@ -79,7 +79,7 @@ sound.Add( {
 sound.Add( {
 	name = "LFS_BF109_RPM4",
 	channel = CHAN_STATIC,
-	volume = 1.0,
+	volume = 0.8,
 	level = 125,
 	sound = "^lfs/bf109/rpm_4.wav"
 } )
@@ -87,7 +87,7 @@ sound.Add( {
 sound.Add( {
 	name = "LFS_BF109_DIST",
 	channel = CHAN_STATIC,
-	volume = 1.0,
+	volume = 1,
 	level = 125,
 	sound = "^lfs/bf109/dist.wav"
 } )

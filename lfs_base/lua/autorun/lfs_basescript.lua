@@ -6,7 +6,7 @@ local meta = FindMetaTable( "Player" )
 simfphys = istable( simfphys ) and simfphys or {} -- lets check if the simfphys table exists. if not, create it!
 simfphys.LFS = {} -- lets add another table for this project. We will be storing all our global functions and variables here. LFS means LunasFlightSchool
 
-simfphys.LFS.VERSION = 300
+simfphys.LFS.VERSION = 301
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 simfphys.LFS.KEYS_IN = {}
@@ -18,14 +18,12 @@ simfphys.LFS.NPCsStored = {}
 simfphys.LFS.NextNPCsGetAll = 0
 
 simfphys.LFS.cVar_IgnoreNPCs = CreateConVar( "lfs_ai_ignorenpcs", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"should LFS-AI ignore NPC's?" )
-simfphys.LFS.cVar_SelfRepair = CreateConVar( "lfs_allow_selfrepair", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"enable/disable self-repair/refil feature?" )
 
 simfphys.LFS.FreezeTeams = CreateConVar( "lfs_freeze_teams", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"enable/disable auto ai-team switching" )
 simfphys.LFS.TeamPassenger = CreateConVar( "lfs_teampassenger", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"only allow players of matching ai-team to enter the vehicle? 1 = team only, 0 = everyone can enter" )
 simfphys.LFS.PlayerDefaultTeam = CreateConVar( "lfs_default_teams", "0", {FCVAR_REPLICATED , FCVAR_ARCHIVE},"set default player ai-team" )
 
 simfphys.LFS.IgnoreNPCs = simfphys.LFS.cVar_IgnoreNPCs and simfphys.LFS.cVar_IgnoreNPCs:GetBool() or false
-simfphys.LFS.SelfRepair = simfphys.LFS.cVar_SelfRepair and simfphys.LFS.cVar_SelfRepair:GetBool() or false
 simfphys.LFS.IgnorePlayers = cVar_playerignore and cVar_playerignore:GetBool() or false
 
 simfphys.LFS.pSwitchKeys = {[KEY_1] = 1,[KEY_2] = 2,[KEY_3] = 3,[KEY_4] = 4,[KEY_5] = 5,[KEY_6] = 6,[KEY_7] = 7,[KEY_8] = 8,[KEY_9] = 9,[KEY_0] = 10}
@@ -371,6 +369,8 @@ if SERVER then
 	util.AddNetworkString( "lfs_failstartnotify" )
 	util.AddNetworkString( "lfs_admin_setconvar" )
 	util.AddNetworkString( "lfs_player_request_filter" )
+	util.AddNetworkString( "lfs_hitmarker" )
+	util.AddNetworkString( "lfs_killmarker" )
 
 	net.Receive( "lfs_player_request_filter", function( length, ply )
 		if not IsValid( ply ) then return end
@@ -688,11 +688,46 @@ if CLIENT then
 	local cvarShowRollIndic = CreateClientConVar( "lfs_show_rollindicator", 0, true, false)
 	local cvarUnlockControls = CreateClientConVar( "lfs_hipster", 0, true, true)
 	local cvarDisableQMENU = CreateClientConVar( "lfs_qmenudisable", 1, true, false)
-	
+	local cvarHitMarker = CreateConVar( "lfs_hitmarker", 1, true, false)
+
 	local ShowPlaneIdent = cvarShowPlaneIdent and cvarShowPlaneIdent:GetBool() or true
 	local ShowShowRollIndic = cvarShowRollIndic and cvarShowRollIndic:GetBool() or false
-	
+	local ShowHitMarker = cvarHitMarker and cvarHitMarker:GetBool() or false
+
 	simfphys.LFS.AltitudeMinZ = 0
+
+	local LastHitMarker = 0
+	local LastKillMarker = 0
+
+	net.Receive( "lfs_hitmarker", function( len )
+		if not ShowHitMarker  then return end
+
+		if LastHitMarker - math.random(0.09,0.14) > CurTime() then return end
+
+		LastHitMarker = CurTime() + 0.15
+
+		local ply = LocalPlayer()
+
+		local vehicle = ply:lfsGetPlane()
+		if IsValid( ply:lfsGetPlane() ) then 
+			vehicle:HitMarker( LastHitMarker )
+		end
+	end )
+
+	net.Receive( "lfs_killmarker", function( len )
+		if not ShowHitMarker  then return end
+
+		if LastKillMarker - 0.14 > CurTime() then return end
+
+		LastKillMarker = CurTime() + 0.5
+
+		local ply = LocalPlayer()
+
+		local vehicle = ply:lfsGetPlane()
+		if IsValid( ply:lfsGetPlane() ) then 
+			vehicle:KillMarker( LastKillMarker )
+		end
+	end )
 
 	local function PrecacheArc(cx,cy,radius,thickness,startang,endang,roughness,bClockwise)
 		local triarc = {}
@@ -1263,7 +1298,13 @@ if CLIENT then
 			slider:SetMax( 1 )
 			slider:SetDecimals( 2 )
 			slider:SetConVar( "lfs_camerafocus" )
-			
+
+			local CheckBox = vgui.Create( "DCheckBoxLabel", DPanel )
+			CheckBox:SetText( "Show Hit/Kill Marker" )
+			CheckBox:SetConVar("lfs_hitmarker") 
+			CheckBox:SizeToContents()
+			CheckBox:SetPos( 20, 115 )
+
 			local CheckBox = vgui.Create( "DCheckBoxLabel", DPanel )
 			CheckBox:SetText( "Show Plane Identifier" )
 			CheckBox:SetConVar("lfs_show_identifier") 
@@ -1275,27 +1316,6 @@ if CLIENT then
 			CheckBox:SetConVar("lfs_show_rollindicator") 
 			CheckBox:SizeToContents()
 			CheckBox:SetPos( 180, 140 )
-
-			--[[
-			local DComboBox = vgui.Create( "DComboBox", DPanel )
-			DComboBox:SetPos( 150, 105 )
-			DComboBox:SetSize( 100, 20 )
-			for voicename, _ in pairs( simfphys.LFS.NotificationVoices ) do DComboBox:AddChoice( voicename ) end
-			DComboBox:SetValue( cvarNotificationVoice:GetString() )
-			DComboBox.OnSelect = function( self, index, value )
-				cvarNotificationVoice:SetString( value ) 
-			end
-
-			local DermaButton = vgui.Create( "DButton", DPanel )
-			DermaButton:SetText( "" )
-			DermaButton:SetPos( 260, 106 )
-			DermaButton:SetSize( 16, 16 )
-			DermaButton.DoClick = function() simfphys.LFS.PlayNotificationSound() end
-			DermaButton.Paint = function(self, w, h ) 
-				surface.SetMaterial( soundPreviewMat )
-				surface.DrawTexturedRect( 0, 0, w, h ) 
-			end
-			]]
 
 			local DButton = vgui.Create("DPanel",DPanel)
 			DButton:SetText("")
@@ -1627,18 +1647,6 @@ if CLIENT then
 					net.WriteString( tostring( val and 1 or 0 ) )
 				net.SendToServer()
 			end
-
-			local CheckBox = vgui.Create( "DCheckBoxLabel", DPanel )
-			CheckBox:SetPos( 20, 125 )
-			CheckBox:SetText( "Enable self-Repair/Refil on Vehicle shutdown" )
-			CheckBox:SetValue( GetConVar( "lfs_allow_selfrepair" ):GetInt() )
-			CheckBox:SizeToContents()
-			function CheckBox:OnChange( val )
-				net.Start("lfs_admin_setconvar")
-					net.WriteString("lfs_allow_selfrepair")
-					net.WriteString( tostring( val and 1 or 0 ) )
-				net.SendToServer()
-			end
 		end
 	end
 
@@ -1780,6 +1788,10 @@ if CLIENT then
 	cvars.AddChangeCallback( "lfs_show_rollindicator", function( convar, oldValue, newValue ) 
 		ShowShowRollIndic = tonumber( newValue ) ~=0
 	end)
+
+	cvars.AddChangeCallback( "lfs_hitmarker", function( convar, oldValue, newValue ) 
+		ShowHitMarker = tonumber( newValue ) ~=0
+	end)
 end
 
 cvars.AddChangeCallback( "ai_ignoreplayers", function( convar, oldValue, newValue ) 
@@ -1788,10 +1800,6 @@ end)
 
 cvars.AddChangeCallback( "lfs_ai_ignorenpcs", function( convar, oldValue, newValue ) 
 	simfphys.LFS.IgnoreNPCs = tonumber( newValue ) ~=0
-end)
-
-cvars.AddChangeCallback( "lfs_allow_selfrepair", function( convar, oldValue, newValue ) 
-	simfphys.LFS.SelfRepair = tonumber( newValue ) ~=0
 end)
 
 hook.Add( "InitPostEntity", "!!!lfscheckupdates", function()

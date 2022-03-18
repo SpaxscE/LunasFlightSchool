@@ -44,6 +44,8 @@ function ENT:ExhaustFX()
 end
 
 function ENT:CalcEngineSound( RPM, Pitch, Doppler )
+	Pitch = self:HandlePropellerSND( Pitch, RPM, 0.7,1,0.15,0.3 )
+
 	local Low = 500
 	local Mid = 700
 	local High = 950
@@ -90,6 +92,8 @@ function ENT:EngineActiveChanged( bActive )
 		
 		self.DIST = CreateSound( self, "LFS_SPITFIRE_DIST" )
 		self.DIST:PlayEx(0,0)
+
+		self:AddPropellerSND(95)
 	else
 		self:SoundStop()
 	end
@@ -112,10 +116,10 @@ function ENT:SoundStop()
 	if self.RPM4 then
 		self.RPM4:Stop()
 	end
-	
 	if self.DIST then
 		self.DIST:Stop()
 	end
+	self:RemovePropellerSND()
 end
 
 function ENT:AnimFins()
