@@ -123,3 +123,11 @@ sound.Add( {
 	level = 90,
 	sound = "lfs/bf109/weapons/wing_lastshot.wav"
 } )
+
+sound.Add( {
+	name = "BF109_FLYBY",
+	channel = CHAN_STATIC,
+	volume = 1,
+	level = 110,
+	sound = "lfs/bf109/flyby.wav"
+} )

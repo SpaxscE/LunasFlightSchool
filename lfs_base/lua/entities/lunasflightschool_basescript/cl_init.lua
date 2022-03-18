@@ -310,15 +310,38 @@ function ENT:CheckEngineState()
 	if Active then
 		local RPM = self:GetRPM()
 		local LimitRPM = self:GetLimitRPM()
-		
+
+		local ply = LocalPlayer()
+
+		local Vel = self:GetVelocity()
+
+		local ToPlayer = (ply:GetPos() - self:GetPos()):GetNormalized()
+		local VelDir = Vel:GetNormalized()
+
+		local Approaching = math.deg( math.acos( math.Clamp( ToPlayer:Dot( VelDir ) ,-1,1) ) ) < 80
+
+		if Approaching ~= self.OldApproaching then
+			self.OldApproaching = Approaching
+
+			if not Approaching then
+				if (self.NextSound_flyby or 0) < CurTime() then
+					self.NextSound_flyby = CurTime() + 2
+
+					if Vel:Length() > self:GetMaxVelocity() * 0.6 and self:GetThrottlePercent() > 50 then
+						self:PlayFlybySND()
+					end
+				end
+			end
+		end
+
 		local tPer = RPM / LimitRPM
-		
-		local CurDist = (LocalPlayer():GetViewEntity():GetPos() - self:GetPos()):Length()
+
+		local CurDist = (ply:GetViewEntity():GetPos() - self:GetPos()):Length()
 		self.PitchOffset = self.PitchOffset and self.PitchOffset + (math.Clamp((CurDist - self.OldDist) / FrameTime() / 125,-40,20 *  tPer) - self.PitchOffset) * FrameTime() * 5 or 0
 		self.OldDist = CurDist
-		
+
 		local Pitch = (RPM - self:GetIdleRPM()) / (LimitRPM - self:GetIdleRPM())
-		
+
 		self:CalcEngineSound( RPM, Pitch, -self.PitchOffset )
 	end
 	
@@ -326,6 +349,9 @@ function ENT:CheckEngineState()
 		self.oldEnActive = Active
 		self:EngineActiveChanged( Active )
 	end
+end
+
+function ENT:PlayFlybySND()
 end
 
 function ENT:AnimFins()

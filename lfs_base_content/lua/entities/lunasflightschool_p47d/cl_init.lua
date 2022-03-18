@@ -61,6 +61,10 @@ function ENT:EngineActiveChanged( bActive )
 	end
 end
 
+function ENT:PlayFlybySND()
+	self:EmitSound( "SPITFIRE_FLYBY" )
+end
+
 function ENT:OnRemove()
 	self:SoundStop()
 end

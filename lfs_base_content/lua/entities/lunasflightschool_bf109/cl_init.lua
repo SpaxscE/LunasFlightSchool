@@ -188,3 +188,7 @@ function ENT:AnimLandingGear()
 	self:ManipulateBoneAngles( 3, Angle( -self.SMRG / 2,0,0) )
 	self:ManipulateBoneAngles( 4, Angle( self.SMRG / 2,0,0) )
 end
+
+function ENT:PlayFlybySND()
+	self:EmitSound( "BF109_FLYBY" )
+end

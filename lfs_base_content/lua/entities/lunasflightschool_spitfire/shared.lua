@@ -107,3 +107,11 @@ sound.Add( {
 	level = 90,
 	sound = "lfs/spitfire/weapons/wing_lastshot.wav"
 } )
+
+sound.Add( {
+	name = "SPITFIRE_FLYBY",
+	channel = CHAN_STATIC,
+	volume = 1,
+	level = 110,
+	sound = "lfs/spitfire/flyby.wav"
+} )

@@ -103,6 +103,8 @@ function ENT:LFSHudPaintCrosshair( HitPlane, HitPilot ) -- crosshair
 	surface.DrawLine( HitPlane.x + 1, HitPlane.y + 11, HitPlane.x + 1, HitPlane.y + 21 ) 
 	surface.DrawLine( HitPlane.x + 1, HitPlane.y - 19, HitPlane.x + 1, HitPlane.y - 16 ) 
 	simfphys.LFS.DrawCircle( HitPilot.x + 1, HitPilot.y + 1, 34 )
+
+	self:LFSPaintHitMarker( HitPlane )
 end
 ]]--
 
@@ -189,6 +191,10 @@ function ENT:AnimRotor()
 	Rot:Normalize() 
 	
 	self.TheRotor:SetAngles( self:LocalToWorldAngles( Rot ) )
+end
+
+function ENT:PlayFlybySND()
+	--[[ play a flyby sound here ]]--
 end
 
 function ENT:AnimCabin()

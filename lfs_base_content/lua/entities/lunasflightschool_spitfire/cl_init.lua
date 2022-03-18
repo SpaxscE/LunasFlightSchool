@@ -177,3 +177,7 @@ function ENT:AnimLandingGear()
 	
 	self:ManipulateBoneAngles( 5, Angle( 0,0,45 - self.SMRG / 2) )
 end
+
+function ENT:PlayFlybySND()
+	self:EmitSound( "SPITFIRE_FLYBY" )
+end

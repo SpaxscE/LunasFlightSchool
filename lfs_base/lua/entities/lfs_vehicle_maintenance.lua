@@ -50,10 +50,10 @@ if SERVER then
 	end
 	
 	function ENT:Think()
-		self:NextThink( CurTime() + 2 )
+		self:NextThink( CurTime() + 0.5 )
 
-		local Dist = 500
-		local Pos =  self:GetPos()
+		local Dist = 600
+		local Pos =  self:LocalToWorld( Vector(0,0,200) )
 
 		local FoundVehicles = {}
 		for _, v in pairs( ents.FindInSphere( Pos, Dist ) ) do
@@ -84,8 +84,7 @@ if SERVER then
 				continue
 			else
 				local pos = v:GetPos()
-				if (pos - Pos):Length() > Dist or not v.MaintenanceStart then
-					v:StopMaintenance()
+				if not v.MaintenanceStart then
 					self.FoundVehicles[ id ] = nil
 				end
 			end
@@ -97,6 +96,10 @@ end
 
 if CLIENT then
 	local RING = Material( "effects/select_ring" )
+
+	local AMMO = Material( "lfs_repairmode_ammo.png" )
+	local HEALTH = Material( "lfs_repairmode_health.png" )
+
 	function ENT:Draw()
 		self:DrawModel()
 
@@ -104,29 +107,40 @@ if CLIENT then
 
 		render.SetColorMaterial()
 
-		local pos = self:GetPos()
-		local radius = 500
-		local Dist = (ply:GetPos() - pos):Length()
-
-		if (self.NextPing or 0) < CurTime() then
-			self.NextPing = CurTime() + 3
-			self.WaveScale = 1
-			self:EmitSound( "npc/combine_gunship/ping_search.wav",90,80, 0.25 )
-		end
-
-		if (self.WaveScale or 0) > 0 then
-			self.WaveScale = math.max( self.WaveScale - FrameTime(), 0 )
-			local InvScale = 1 - self.WaveScale
-	
-			cam.Start3D2D( self:GetPos() + Vector(0,0,10), self:LocalToWorldAngles( Angle(0,-90,0) ), 1 )
-				local Col =  Color(0,200,255,255)
-				surface.SetDrawColor( Col.r, Col.g, Col.b, 10 * self.WaveScale )
-				surface.SetMaterial( RING )
-				surface.DrawTexturedRectRotated( 0, 0, radius * 2.3 * InvScale, radius * 2.3 * InvScale, 0 )
-
-				InvScale = InvScale * InvScale
-				surface.DrawTexturedRectRotated( 0, 0, radius * 2.3 * InvScale, radius * 2.3 * InvScale, 0 )
+		if IsValid( ply:lfsGetPlane() ) then
+			cam.Start3D2D( self:LocalToWorld( Vector(-25,0,150) ), Angle(0,ply:EyeAngles().y - 90,90), 0.75 )
+				local Col =  Color(255,255,255,255)
+				surface.SetDrawColor( Col.r, Col.g, Col.b, 255)
+				surface.SetMaterial( AMMO )
+				surface.DrawTexturedRectRotated( -64, 0, 128, 128, 0 )
+				surface.SetMaterial( HEALTH )
+				surface.DrawTexturedRectRotated( 64, 0, 128, 128, 0 )
 			cam.End3D2D()
+
+			local pos = self:GetPos()
+			local radius = 500
+			local Dist = (ply:GetPos() - pos):Length()
+
+			if (self.NextPing or 0) < CurTime() then
+				self.NextPing = CurTime() + 3
+				self.WaveScale = 1
+				self:EmitSound( "npc/combine_gunship/ping_search.wav",90,80, 0.25 )
+			end
+
+			if (self.WaveScale or 0) > 0 then
+				self.WaveScale = math.max( self.WaveScale - FrameTime(), 0 )
+				local InvScale = 1 - self.WaveScale
+		
+				cam.Start3D2D( self:GetPos() + Vector(0,0,10), self:LocalToWorldAngles( Angle(0,-90,0) ), 1 )
+					local Col =  Color(255,255,255,255)
+					surface.SetDrawColor( Col.r, Col.g, Col.b, 10 * self.WaveScale )
+					surface.SetMaterial( RING )
+					surface.DrawTexturedRectRotated( 0, 0, radius * 2.3 * InvScale, radius * 2.3 * InvScale, 0 )
+
+					InvScale = InvScale * InvScale
+					surface.DrawTexturedRectRotated( 0, 0, radius * 2.3 * InvScale, radius * 2.3 * InvScale, 0 )
+				cam.End3D2D()
+			end
 		end
 	end
 end
