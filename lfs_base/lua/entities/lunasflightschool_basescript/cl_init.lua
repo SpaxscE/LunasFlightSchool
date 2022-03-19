@@ -330,7 +330,11 @@ function ENT:CheckEngineState()
 
 					if Vel:Length() > self:GetMaxVelocity() * 0.6 and self:GetThrottlePercent() > 50 then
 						if ply:lfsGetPlane() ~= self then
-							self:PlayFlybySND()
+							local Dist = (ply:GetPos() - self:GetPos()):Length()
+
+							if Dist < 3000 then
+								self:PlayFlybySND()
+							end
 						end
 					end
 				end
