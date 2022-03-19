@@ -11,6 +11,10 @@ end
 function ENT:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 
+	if self:GetAI() then
+		self:EmitSound( "SPITFIRE_FIRE_LASTSHOT" )
+	end
+
 	self:SetNextPrimary( 0.03 )
 	
 	self.MirrorPrimary = not self.MirrorPrimary
@@ -48,35 +52,38 @@ end
 
 function ENT:HandleWeapons(Fire1, Fire2)
 	local Driver = self:GetDriver()
-	
+
 	if IsValid( Driver ) then
 		if self:GetAmmoPrimary() > 0 then
 			Fire1 = Driver:KeyDown( IN_ATTACK )
 		end
 	end
-	
+
 	if Fire1 then
 		self:PrimaryAttack()
 	end
-	
+
 	if self.OldFire ~= Fire1 then
-		
 		if Fire1 then
-			self.wpn1 = CreateSound( self, "SPITFIRE_FIRE_LOOP" )
-			self.wpn1:Play()
-			self:CallOnRemove( "stopmesounds1", function( ent )
-				if ent.wpn1 then
-					ent.wpn1:Stop()
-				end
-			end)
+			if not self:GetAI() then
+				self.wpn1 = CreateSound( self, "SPITFIRE_FIRE_LOOP" )
+				self.wpn1:Play()
+				self:CallOnRemove( "stopmesounds1", function( ent )
+					if ent.wpn1 then
+						ent.wpn1:Stop()
+					end
+				end)
+			end
 		else
 			if self.OldFire == true then
 				if self.wpn1 then
 					self.wpn1:Stop()
 				end
 				self.wpn1 = nil
-					
-				self:EmitSound( "SPITFIRE_FIRE_LASTSHOT" )
+
+				if not self:GetAI() then
+					self:EmitSound( "SPITFIRE_FIRE_LASTSHOT" )
+				end
 			end
 		end
 		

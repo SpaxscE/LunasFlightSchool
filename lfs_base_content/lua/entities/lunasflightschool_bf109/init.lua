@@ -12,6 +12,10 @@ end
 function ENT:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 
+	if self:GetAI() then
+		self:EmitSound( "BF109_FIRE_LASTSHOT" )
+	end
+
 	self:SetNextPrimary( 0.03 )
 	
 	self.MirrorPrimary = not self.MirrorPrimary
@@ -41,7 +45,11 @@ end
 
 function ENT:SecondaryAttack()
 	if not self:CanSecondaryAttack() then return end
-	
+
+	if self:GetAI() then
+		self:EmitSound( "BF109_FIRE2_LASTSHOT" )
+	end
+
 	self:SetNextSecondary( 0.15 )
 	
 	self.MirrorSecondary = not self.MirrorSecondary
@@ -71,7 +79,7 @@ end
 
 function ENT:HandleWeapons(Fire1, Fire2)
 	local Driver = self:GetDriver()
-	
+
 	if IsValid( Driver ) then
 		if self:GetAmmoPrimary() > 0 then
 			Fire1 = Driver:KeyDown( IN_ATTACK )
@@ -81,33 +89,37 @@ function ENT:HandleWeapons(Fire1, Fire2)
 			Fire2 = Driver:KeyDown( IN_ATTACK2 )
 		end
 	end
-	
+
 	if Fire1 then
 		self:PrimaryAttack()
 	end
-	
+
 	if Fire2 then
 		self:SecondaryAttack()
 	end
-	
+
 	if self.OldFire ~= Fire1 then
 		
 		if Fire1 then
-			self.wpn1 = CreateSound( self, "BF109_FIRE_LOOP" )
-			self.wpn1:Play()
-			self:CallOnRemove( "stopmesounds1", function( ent )
-				if ent.wpn1 then
-					ent.wpn1:Stop()
-				end
-			end)
+			if not self:GetAI() then
+				self.wpn1 = CreateSound( self, "BF109_FIRE_LOOP" )
+				self.wpn1:Play()
+				self:CallOnRemove( "stopmesounds1", function( ent )
+					if ent.wpn1 then
+						ent.wpn1:Stop()
+					end
+				end)
+			end
 		else
 			if self.OldFire == true then
 				if self.wpn1 then
 					self.wpn1:Stop()
 				end
 				self.wpn1 = nil
-					
-				self:EmitSound( "BF109_FIRE_LASTSHOT" )
+
+				if not self:GetAI() then
+					self:EmitSound( "BF109_FIRE_LASTSHOT" )
+				end
 			end
 		end
 		
@@ -115,23 +127,27 @@ function ENT:HandleWeapons(Fire1, Fire2)
 	end
 	
 	if self.OldFire2 ~= Fire2 then
-	
+
 		if Fire2 then
-			self.wpn2 = CreateSound( self, "BF109_FIRE2_LOOP" )
-			self.wpn2:Play()
-			self:CallOnRemove( "stopmesounds2", function( ent )
-				if ent.wpn2 then
-					ent.wpn2:Stop()
-				end
-			end)
+			if not self:GetAI() then
+				self.wpn2 = CreateSound( self, "BF109_FIRE2_LOOP" )
+				self.wpn2:Play()
+				self:CallOnRemove( "stopmesounds2", function( ent )
+					if ent.wpn2 then
+						ent.wpn2:Stop()
+					end
+				end)
+			end
 		else
 			if self.OldFire2 == true then
 				if self.wpn2 then
 					self.wpn2:Stop()
 				end
 				self.wpn2 = nil
-					
-				self:EmitSound( "BF109_FIRE2_LASTSHOT" )
+
+				if not self:GetAI() then
+					self:EmitSound( "BF109_FIRE2_LASTSHOT" )
+				end
 			end
 		end
 		

@@ -143,9 +143,9 @@ function ENT:KillMarker( LastKillMarker )
 
 	local ply = LocalPlayer()
 
-	util.ScreenShake( ply:GetPos(), 5, 5, 2, 50000 )
+	util.ScreenShake( ply:GetPos(), 4, 2, 2, 50000 )
 
-	ply:EmitSound( table.Random( {"lfs/plane_preexp1.ogg","lfs/plane_preexp3.ogg"} ), 140, 100, 0.7, CHAN_WEAPON )
+	ply:EmitSound( table.Random( {"lfs/plane_preexp1.ogg","lfs/plane_preexp3.ogg"} ), 140, 100, 0.5, CHAN_WEAPON )
 
 	ply:EmitSound( "physics/metal/metal_solid_impact_bullet4.wav", 140, 255, 0.3, CHAN_VOICE )
 end
@@ -312,22 +312,22 @@ function ENT:CheckEngineState()
 		local LimitRPM = self:GetLimitRPM()
 
 		local ply = LocalPlayer()
-		local ViewEnt = ply:GetViewEntity()
+		local Time = CurTime()
 
-		local Vel = self:GetVelocity()
+		if (self.NextSound_flyby or 0) < Time then
+			self.NextSound_flyby = Time + 0.1
 
-		local ToPlayer = (ply:GetPos() - self:GetPos()):GetNormalized()
-		local VelDir = Vel:GetNormalized()
+			local Vel = self:GetVelocity()
 
-		local Approaching = math.deg( math.acos( math.Clamp( ToPlayer:Dot( VelDir ) ,-1,1) ) ) < 80
+			local ToPlayer = (ply:GetPos() - self:GetPos()):GetNormalized()
+			local VelDir = Vel:GetNormalized()
 
-		if Approaching ~= self.OldApproaching then
-			self.OldApproaching = Approaching
+			local Approaching = math.deg( math.acos( math.Clamp( ToPlayer:Dot( VelDir ) ,-1,1) ) ) < 80
 
-			if not Approaching then
-				if (self.NextSound_flyby or 0) < CurTime() then
-					self.NextSound_flyby = CurTime() + 2
+			if Approaching ~= self.OldApproaching then
+				self.OldApproaching = Approaching
 
+				if not Approaching then
 					if Vel:Length() > self:GetMaxVelocity() * 0.6 and self:GetThrottlePercent() > 50 then
 						if ply:lfsGetPlane() ~= self then
 							local Dist = (ply:GetPos() - self:GetPos()):Length()
@@ -343,7 +343,7 @@ function ENT:CheckEngineState()
 
 		local tPer = RPM / LimitRPM
 
-		local CurDist = (ViewEnt:GetPos() - self:GetPos()):Length()
+		local CurDist = (ply:GetViewEntity():GetPos() - self:GetPos()):Length()
 		self.PitchOffset = self.PitchOffset and self.PitchOffset + (math.Clamp((CurDist - self.OldDist) / FrameTime() / 125,-40,20 *  tPer) - self.PitchOffset) * FrameTime() * 5 or 0
 		self.OldDist = CurDist
 

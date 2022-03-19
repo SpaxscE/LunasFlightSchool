@@ -7,8 +7,12 @@ include("shared.lua")
 function ENT:PrimaryAttack()
 	if not self:CanPrimaryAttack() then return end
 
+	if self:GetAI() then
+		self:EmitSound( "SPITFIRE_FIRE_LASTSHOT" )
+	end
+
 	self:SetNextPrimary( 0.03 )
-	
+
 	local fP = {
 		Vector(141.83,-121.84,68.4),
 		Vector(141.83,121.84,68.4),
@@ -157,25 +161,29 @@ function ENT:HandleWeapons(Fire1, Fire2)
 		end
 		self.OldFire2 = Fire2
 	end
-	
+
 	if self.OldFire ~= Fire1 then
-		
+
 		if Fire1 then
-			self.wpn1 = CreateSound( self, "SPITFIRE_FIRE_LOOP" )
-			self.wpn1:Play()
-			self:CallOnRemove( "stopmesounds1", function( ent )
-				if ent.wpn1 then
-					ent.wpn1:Stop()
-				end
-			end)
+			if not self:GetAI() then
+				self.wpn1 = CreateSound( self, "SPITFIRE_FIRE_LOOP" )
+				self.wpn1:Play()
+				self:CallOnRemove( "stopmesounds1", function( ent )
+					if ent.wpn1 then
+						ent.wpn1:Stop()
+					end
+				end)
+			end
 		else
 			if self.OldFire == true then
 				if self.wpn1 then
 					self.wpn1:Stop()
 				end
 				self.wpn1 = nil
-					
-				self:EmitSound( "SPITFIRE_FIRE_LASTSHOT" )
+
+				if not self:GetAI() then
+					self:EmitSound( "SPITFIRE_FIRE_LASTSHOT" )
+				end
 			end
 		end
 		
