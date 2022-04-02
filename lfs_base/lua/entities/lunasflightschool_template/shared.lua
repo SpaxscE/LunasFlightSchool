@@ -83,3 +83,6 @@ ENT.MaintenanceRepairAmount = 250 -- how much health to restore
 function ENT:AddDataTables() -- use this to add networkvariables instead of ENT:SetupDataTables().
 	--[[DO NOT USE SLOTS SMALLER THAN 10]]--
 end
+
+function ENT:CalcMainActivity( ply ) -- edit player anims here, works just like CalcMainActivity Hook.
+end
