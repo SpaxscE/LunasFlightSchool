@@ -96,6 +96,9 @@ function ENT:SetupDataTables()
 	end
 end
 
+function ENT:CalcMainActivity( ply )
+end
+
 function ENT:AddDataTables()
 end
 

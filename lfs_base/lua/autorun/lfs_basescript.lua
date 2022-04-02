@@ -171,6 +171,20 @@ hook.Add( "OnEntityCreated", "!!!!lfsEntitySorter", function( ent )
 	end )
 end )
 
+hook.Add("CalcMainActivity", "!!!lfs_playeranimations", function(ply)
+	if not ply.lfsGetPlane then return end
+
+	local Ent = ply:lfsGetPlane()
+
+	if IsValid( Ent ) then
+		local A,B = Ent:CalcMainActivity( ply )
+
+		if A and B then
+			return A, B
+		end
+	end
+end)
+
 function simfphys.LFS:NPCsGetAll()
 	local Time = CurTime()
 	
