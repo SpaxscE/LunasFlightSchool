@@ -237,8 +237,6 @@ function ENT:GetPassenger( num )
 	if num == 1 then
 		return self:GetDriver()
 	else
-		if num == -1 then return NULL end
-
 		for _, Pod in pairs( self:GetPassengerSeats() ) do
 			local id = Pod:GetNWInt( "pPodIndex", -1 )
 			if id == -1 then continue end
