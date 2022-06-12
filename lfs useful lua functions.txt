@@ -21,6 +21,7 @@ LFSPLANE:GetDriverSeat() -- returns the drivers pod (entity)
 LFSPLANE:GetGunner()  -- returns the gunner if defined (entity)
 LFSPLANE:GetGunnerSeat() -- returns the gunners pod if defined (entity)
 LFSPLANE:GetPassengerSeats() -- returns all passenger seats (table)
+LFSPLANE:GetPassenger( ID )-- returns the player that is sitting in the given ID's pod (it's the same id you see in your hud, meaning 1 = same as LFSPlane:GetDriver())
 LFSPLANE:GetActive() -- returns true if the vehicle is active. Active does not mean that the engine is running (bool)
 LFSPLANE:GetEngineActive() -- returns true if the engine is running (bool)
 

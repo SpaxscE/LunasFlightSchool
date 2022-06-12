@@ -233,6 +233,25 @@ function ENT:GetPassengerSeats()
 	return self.pSeats
 end
 
+function ENT:GetPassenger( num )
+	if num == 1 then
+		return self:GetDriver()
+	else
+		if num == -1 then return NULL end
+
+		for _, Pod in pairs( self:GetPassengerSeats() ) do
+			local id = Pod:GetNWInt( "pPodIndex", -1 )
+			if id == -1 then continue end
+
+			if id == num then
+				return Pod:GetDriver()
+			end
+		end
+
+		return NULL
+	end
+end
+
 sound.Add( {
 	name = "LFS_PLANE_EXPLOSION",
 	channel = CHAN_STATIC,
