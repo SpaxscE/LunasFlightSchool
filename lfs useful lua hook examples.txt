@@ -1,0 +1,22 @@
+
+if SERVER then
+	-- prevent starting of all vehicles
+	hook.Add( "LFS.IsEngineStartAllowed", "prevent_start_example", function( LFSPLANE )
+		return false
+	end)
+
+	hook.Add( "LFS.OnPlayerRequestSeatSwitch", "seat_switch_example", function( ply, LFSPLANE, OldSeat, NewSeat )
+		-- lets check if someone is already sitting in that seat and kick him out
+		if IsValid( NewSeat:GetDriver() ) then
+			NewSeat:GetDriver():ExitVehicle()
+		end
+		--return false   --to prevent seat switch
+	end )
+end
+
+hook.Add( "LFS.PlayerKeyDown", "override_key_input_example", function( ply, KeyName, IsPressed )
+	-- prevents free look
+	if KeyName == "FREELOOK" then
+		return false
+	end
+end )

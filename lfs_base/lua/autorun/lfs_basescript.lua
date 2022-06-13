@@ -347,15 +347,15 @@ local IS_MOUSE_ENUM = {
 	[MOUSE_WHEEL_DOWN] = true,
 }
 
-function meta:lfsGetInput( name )
-	if self.LFS_HIPSTER then
+local function lfsGetInput( ply, name )
+	if ply.LFS_HIPSTER then
 		if SERVER then
-			self.LFS_KEYDOWN = self.LFS_KEYDOWN and self.LFS_KEYDOWN or {}
-			
-			return self.LFS_KEYDOWN[ name ]
+			ply.LFS_KEYDOWN = ply.LFS_KEYDOWN and ply.LFS_KEYDOWN or {}
+
+			return ply.LFS_KEYDOWN[ name ]
 		else
-			local Key = self:lfsGetControls()[ name ]
-			
+			local Key = ply:lfsGetControls()[ name ]
+
 			if IS_MOUSE_ENUM[ Key ] then
 				return input.IsMouseDown( Key ) 
 			else
@@ -363,17 +363,28 @@ function meta:lfsGetInput( name )
 			end
 		end
 	else
-		if self.LFS_HIPSTER == nil then -- something went wrong.
-			self:lfsBuildControls()
-			
+		if ply.LFS_HIPSTER == nil then -- something went wrong.
+			ply:lfsBuildControls()
+
 			return false
 		else
 			if simfphys.LFS.KEYS_IN[ name ] then
-				return self:KeyDown( simfphys.LFS.KEYS_IN[ name ] )
+				return ply:KeyDown( simfphys.LFS.KEYS_IN[ name ] )
 			else
 				return false
 			end
 		end
+	end
+end
+
+function meta:lfsGetInput( name )
+	local Pressed = lfsGetInput( self, name )
+	local NewPressed = hook.Run( "LFS.PlayerKeyDown", self, name, Pressed )
+
+	if isbool( NewPressed ) then
+		return NewPressed
+	else
+		return Pressed
 	end
 end
 
@@ -493,7 +504,7 @@ if SERVER then
 	
 	hook.Add( "PlayerButtonDown", "!!!lfsButtonDown", function( ply, button )
 		local vehicle = ply:lfsGetPlane()
-		
+
 		for _, LFS_BIND in pairs( ply:lfsGetControls() ) do
 			if LFS_BIND[ button ] then
 				ply:lfsSetInput( LFS_BIND[ button ], true )
@@ -507,9 +518,9 @@ if SERVER then
 				end
 			end
 		end
-		
+
 		if not IsValid( vehicle ) then return end
-		
+
 		if button == KEY_1 then
 			if ply == vehicle:GetDriver() then
 				if vehicle:GetlfsLockedStatus() then
@@ -518,37 +529,44 @@ if SERVER then
 					vehicle:Lock()
 				end
 			else
-				if not IsValid( vehicle:GetDriver() ) and not vehicle:GetAI() then
-					ply:ExitVehicle()
-					
-					local DriverSeat = vehicle:GetDriverSeat()
-					
-					if IsValid( DriverSeat ) then
-						timer.Simple( FrameTime(), function()
-							if not IsValid( vehicle ) or not IsValid( ply ) then return end
-							if IsValid( vehicle:GetDriver() ) or not IsValid( DriverSeat ) or vehicle:GetAI() then return end
-							
-							ply:EnterVehicle( DriverSeat )
-							
-							timer.Simple( FrameTime() * 2, function()
-								if not IsValid( ply ) or not IsValid( vehicle ) then return end
-								ply:SetEyeAngles( Angle(0,vehicle:GetAngles().y,0) )
+				local DriverSeat = vehicle:GetDriverSeat()
+				local CurPod = ply:GetVehicle()
+
+				if hook.Run( "LFS.OnPlayerRequestSeatSwitch", ply, vehicle, CurPod, DriverSeat ) ~= false then
+					if not IsValid( vehicle:GetDriver() ) and not vehicle:GetAI() then
+						ply:ExitVehicle()
+
+						if IsValid( DriverSeat ) then
+							timer.Simple( FrameTime(), function()
+								if not IsValid( vehicle ) or not IsValid( ply ) then return end
+								if IsValid( vehicle:GetDriver() ) or not IsValid( DriverSeat ) or vehicle:GetAI() then return end
+
+								ply:EnterVehicle( DriverSeat )
+
+								timer.Simple( FrameTime() * 2, function()
+									if not IsValid( ply ) or not IsValid( vehicle ) then return end
+									ply:SetEyeAngles( Angle(0,vehicle:GetAngles().y,0) )
+								end)
 							end)
-						end)
+						end
 					end
 				end
 			end
 		else
+			local CurPod = ply:GetVehicle()
+
 			for _, Pod in pairs( vehicle:GetPassengerSeats() ) do
-				if IsValid( Pod ) then
-					if Pod:GetNWInt( "pPodIndex", 3 ) == simfphys.LFS.pSwitchKeys[ button ] then
+				if not IsValid( Pod ) then continue end
+
+				if Pod:GetNWInt( "pPodIndex", 3 ) == simfphys.LFS.pSwitchKeys[ button ] then
+					if hook.Run( "LFS.OnPlayerRequestSeatSwitch", ply, vehicle, CurPod, Pod ) ~= false then
 						if not IsValid( Pod:GetDriver() ) then
 							ply:ExitVehicle()
-						
+
 							timer.Simple( FrameTime(), function()
 								if not IsValid( Pod ) or not IsValid( ply ) then return end
 								if IsValid( Pod:GetDriver() ) then return end
-								
+
 								ply:EnterVehicle( Pod )
 							end)
 						end
