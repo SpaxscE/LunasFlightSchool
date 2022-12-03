@@ -8,6 +8,7 @@ function ENT:SpawnFunction( ply, tr, ClassName )
 	if not tr.Hit then return end
 
 	local ent = ents.Create( ClassName )
+	ent:StoreCPPI( ply )
 	ent:SetPos( tr.HitPos + tr.HitNormal * 120 )
 	ent:Spawn()
 	ent:Activate()

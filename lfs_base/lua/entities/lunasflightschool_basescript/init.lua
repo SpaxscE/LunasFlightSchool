@@ -9,7 +9,7 @@ function ENT:SpawnFunction( ply, tr, ClassName )
 	if not tr.Hit then return end
 
 	local ent = ents.Create( ClassName )
-	ent.dOwnerEntLFS = ply
+	ent:StoreCPPI( ply )
 	ent:SetPos( tr.HitPos + tr.HitNormal * 15 )
 	ent:Spawn()
 	ent:Activate()
@@ -1879,4 +1879,8 @@ end
 
 function ENT:GetMissileOffset()
 	return self:OBBCenter()
+end
+
+function ENT:StoreCPPI( owner )
+	self.dOwnerEntLFS = owner
 end
