@@ -185,6 +185,16 @@ hook.Add("CalcMainActivity", "!!!lfs_playeranimations", function(ply)
 	end
 end)
 
+hook.Add( "StartCommand", "!!!!LFS_grab_command", function( ply, cmd )
+	if not ply.lfsGetPlane then return end
+
+	local veh = ply:lfsGetPlane()
+
+	if not IsValid( veh ) then return end
+
+	veh:StartCommand( ply, cmd )
+end )
+
 function simfphys.LFS:NPCsGetAll()
 	local Time = CurTime()
 	

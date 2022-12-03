@@ -99,6 +99,9 @@ end
 function ENT:CalcMainActivity( ply )
 end
 
+function ENT:StartCommand( ply, cmd )
+end
+
 function ENT:AddDataTables()
 end
 
