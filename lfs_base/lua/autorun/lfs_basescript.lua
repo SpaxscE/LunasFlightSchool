@@ -43,9 +43,7 @@ local DEFAULT_KEYS = {
 	{name = "FREELOOK",		class = "misc",		name_menu = "Freelook (Hold)",	default = MOUSE_MIDDLE,	cmd = "cl_lfs_freelook",				IN_KEY = IN_WALK},
 	{name = "ENGINE",			class = "misc",		name_menu = "Toggle Engine",		default = KEY_R,		cmd = "cl_lfs_toggle_engine",			IN_KEY = IN_RELOAD},
 	{name = "VSPEC",			class = "misc",		name_menu = "Toggle Vehicle-specific Function",	default = KEY_SPACE,	cmd = "cl_lfs_toggle_vspecific",	IN_KEY = IN_JUMP},
-	--{name = "PRI_ATTACK",		class = "misc",		name_menu = "Primary Attack",		default = MOUSE_LEFT,	cmd = "cl_lfs_primaryattack",	IN_KEY = IN_ATTACK},
-	--{name = "SEC_ATTACK",		class = "misc",		name_menu = "Secondary Attack",	default = MOUSE_RIGHT,	cmd = "cl_lfs_secondaryattack",	IN_KEY = IN_ATTACK2},
-	
+
 	{name = "+THROTTLE",		class = "plane",		name_menu = "Throttle Increase",	default = KEY_W,		cmd = "cl_lfs_throttle_inc",	IN_KEY = IN_FORWARD},
 	{name = "-THROTTLE",		class = "plane",		name_menu = "Throttle Decrease",	default = KEY_S,		cmd = "cl_lfs_throttle_dec",	IN_KEY = IN_BACK},
 	{name = "+PITCH",			class = "plane",		name_menu = "Pitch Up",			default = KEY_LSHIFT,	cmd = "cl_lfs_pitch_up",		IN_KEY = IN_SPEED},
@@ -90,59 +88,6 @@ function simfphys.LFS.CheckUpdates()
 			end
 		end
 	end)
-
-	if SERVER then return end
-
-	if not LFS_1878568737 then
-		if file.Exists( "lfs_dontnotifyme.txt", "DATA" ) then return end
-
-		local bgMat = Material( "lfs_controlpanel_bg.png" )
-
-		local InfoFrame = vgui.Create( "DFrame" )
-		InfoFrame:SetSize( 345, 120 )
-		InfoFrame:SetTitle( "" )
-		InfoFrame:SetDraggable( true )
-		InfoFrame:MakePopup()
-		InfoFrame:Center()
-		InfoFrame.Paint = function(self, w, h )
-			draw.RoundedBox( 8, 0, 0, w, h, Color( 0, 0, 0, 255 ) )
-			draw.RoundedBox( 8, 1, 46, w-2, h-47, Color( 120, 120, 120, 255 ) )
-
-			draw.RoundedBox( 4, 1, 26, w-2, 36, Color( 120, 120, 120, 255 ) )
-
-			draw.RoundedBox( 8, 0, 0, w, 25, Color( 127, 0, 0, 255 ) )
-			draw.SimpleText( "[LFS] - Notification", "LFS_FONT", 5, 11, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-
-			surface.SetDrawColor( 255, 255, 255, 50 )
-			surface.SetMaterial( bgMat )
-			surface.DrawTexturedRect( 0, -50, w, w )
-
-			draw.DrawText( "Due to ongoing complaints about filesize,", "LFS_FONT_PANEL", 10, 30, Color( 255, 170, 170, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-			draw.DrawText( "STAR WARS vehicles are NO LONGER PART OF THE BASE ADDON!", "LFS_FONT_PANEL", 10, 45, Color( 255, 170, 170, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-			draw.DrawText( "If you still want to use them", "LFS_FONT_PANEL", 10, 67, Color( 255, 170, 170, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-		end
-
-		local DermaButton = vgui.Create( "DButton", InfoFrame )
-		DermaButton:SetText( "" )
-		DermaButton:SetPos( 150, 63 )
-		DermaButton:SetSize( 150, 20 )
-		DermaButton.DoClick = function() steamworks.ViewFile( "1878568737" ) end
-		DermaButton.Paint = function(self, w, h ) 
-			draw.DrawText( "CLICK HERE", "LFS_FONT", 0, 0, Color( 255, 255, 255, 255 ), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-		end
-
-		local CheckBox = vgui.Create( "DCheckBoxLabel", InfoFrame )
-		CheckBox:SetText( "OK, don't show me this message ever again." )
-		CheckBox:SizeToContents()
-		CheckBox:SetPos( 10, 95 )
-		CheckBox.OnChange = function(self, bVal)
-			if bVal then
-				surface.PlaySound( "buttons/button14.wav" )
-				InfoFrame:Close()
-				file.Write( "lfs_dontnotifyme.txt", "[LFS] - Star Wars Pack Notification suppressing file." )
-			end
-		end
-	end
 end
 
 function simfphys.LFS.GetVersion()
