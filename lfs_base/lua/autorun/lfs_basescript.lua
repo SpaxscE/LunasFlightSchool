@@ -6,7 +6,7 @@ local meta = FindMetaTable( "Player" )
 simfphys = istable( simfphys ) and simfphys or {} -- lets check if the simfphys table exists. if not, create it!
 simfphys.LFS = {} -- lets add another table for this project. We will be storing all our global functions and variables here. LFS means LunasFlightSchool
 
-simfphys.LFS.VERSION = 304
+simfphys.LFS.VERSION = 309
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 simfphys.LFS.KEYS_IN = {}
@@ -730,7 +730,7 @@ if CLIENT then
 	local cvarShowRollIndic = CreateClientConVar( "lfs_show_rollindicator", 0, true, false)
 	local cvarUnlockControls = CreateClientConVar( "lfs_hipster", 0, true, true)
 	local cvarDisableQMENU = CreateClientConVar( "lfs_qmenudisable", 1, true, false)
-	local cvarHitMarker = CreateConVar( "lfs_hitmarker", 1, true, false)
+	local cvarHitMarker = CreateClientConVar( "lfs_hitmarker", 1, true, false)
 
 	local ShowPlaneIdent = cvarShowPlaneIdent and cvarShowPlaneIdent:GetBool() or true
 	local ShowShowRollIndic = cvarShowRollIndic and cvarShowRollIndic:GetBool() or false
