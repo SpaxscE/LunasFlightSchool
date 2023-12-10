@@ -2,6 +2,9 @@
 simfphys = istable( simfphys ) and simfphys or {}
 simfphys.LFS = {}
 
+simfphys.LFS.VERSION = 310
+simfphys.LFS.VERSION_TYPE = ".GIT"
+
 hook.Add( "LVS:Initialize", "[LFS] - Initialize", function()
 	simfphys.LFS.FreezeTeams = GetConVar( "lvs_freeze_teams" )
 	simfphys.LFS.TeamPassenger = GetConVar( "lvs_teampassenger" )
