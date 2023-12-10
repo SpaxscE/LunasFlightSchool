@@ -104,7 +104,9 @@ end
 hook.Add( "PreRegisterSENT", "!!!lfs_to_lvs", function( ent, class )
 	if not ent.Spawnable or not ent.Category then return end
 
-	if not string.StartsWith( class, "lunasflightschool_" ) then return end
+	local Base = ent.Base or ""
+
+	if not string.StartsWith( class, "lunasflightschool_" ) and not string.StartsWith( class, "lfs_" ) and not string.StartsWith( Base:lower(), "lunasflightschool_basescript" ) then return end
 
 	local Variants = {
 		[1] = "[LFS] - ",
