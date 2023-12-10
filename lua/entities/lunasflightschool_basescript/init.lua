@@ -1276,6 +1276,16 @@ function ENT:OnSkyCollide( data, PhysObj )
 	return true
 end
 
+function ENT:AITargetInfront( ent, range )
+	if not IsValid( ent ) then return false end
+	if not range then range = 45 end
+	
+	local DirToTarget = (ent:GetPos() - self:GetPos()):GetNormalized()
+	
+	local InFront = math.deg( math.acos( math.Clamp( self:GetForward():Dot( DirToTarget ) ,-1,1) ) ) < range
+	return InFront
+end
+
 DEFINE_BASECLASS( "lvs_base" )
 
 function ENT:WeaponRestoreAmmo()
