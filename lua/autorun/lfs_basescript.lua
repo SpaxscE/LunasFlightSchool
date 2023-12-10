@@ -145,6 +145,33 @@ if SERVER then
 	return
 end
 
+local LFSSoundList = {}
+hook.Add( "EntityEmitSound", "!!!lfs_volumemanager", function( t )
+	if t.Entity.LFS then
+		local SoundFile = t.SoundName
+
+		if LFSSoundList[ SoundFile ] == true then
+			t.Volume = t.Volume * LVS.EngineVolume
+
+			return true
+
+		elseif LFSSoundList[ SoundFile ] == false then
+			return false
+
+		else
+			local File = string.Replace( SoundFile, "^", "" )
+
+			local Exists = file.Exists( "sound/"..File , "GAME" )
+
+			LFSSoundList[ SoundFile ] = Exists
+
+			if not Exists then
+				print("[LVS] '"..SoundFile.."' not found. Soundfile will not be played and is filtered for this game session to avoid fps issues.")
+			end
+		end
+	end
+end )
+
 list.Set( "ContentCategoryIcons", "[LVS] - Flight School", "icon16/lfs.png" )
 list.Set( "ContentCategoryIcons", "[LFS]", "icon16/lfs.png" )
 
