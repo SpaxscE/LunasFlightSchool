@@ -79,6 +79,14 @@ function ENT:SetupDataTables()
 	end
 end
 
+function ENT:GetlfsLockedStatus()
+	return self:GetlvsLockedStatus()
+end
+
+function ENT:SetlfsLockedStatus( lock )
+	return self:SetlvsLockedStatus( lock )
+end
+
 function ENT:CalcMainActivity( ply )
 end
 

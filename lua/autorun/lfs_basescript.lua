@@ -1,4 +1,16 @@
 
+simfphys = istable( simfphys ) and simfphys or {}
+simfphys.LFS = {}
+
+hook.Add( "LVS:Initialize", "[LFS] - Initialize", function()
+	simfphys.LFS.FreezeTeams = GetConVar( "lvs_freeze_teams" )
+	simfphys.LFS.TeamPassenger = GetConVar( "lvs_teampassenger" )
+	simfphys.LFS.PlayerDefaultTeam = GetConVar( "lvs_default_teams" )
+
+	simfphys.LFS.IgnoreNPCs = LVS.IgnoreNPCs
+	simfphys.LFS.IgnorePlayers = LVS.IgnorePlayers
+end )
+
 local meta = FindMetaTable( "Player" )
 
 local KEYS = {
@@ -112,3 +124,110 @@ THE_FONT.size = 14
 THE_FONT.weight = 1
 THE_FONT.shadow = false
 surface.CreateFont( "LFS_FONT_PANEL", THE_FONT )
+
+local function PrecacheArc(cx,cy,radius,thickness,startang,endang,roughness,bClockwise)
+	local triarc = {}
+	local deg2rad = math.pi / 180
+
+	local startang,endang = startang or 0, endang or 0
+	if bClockwise and (startang < endang) then
+		local temp = startang
+		startang = endang
+		endang = temp
+		temp = nil
+	elseif (startang > endang) then 
+		local temp = startang
+		startang = endang
+		endang = temp
+		temp = nil
+	end
+
+	local roughness = math.max(roughness or 1, 1)
+	local step = roughness
+	if bClockwise then
+		step = math.abs(roughness) * -1
+	end
+
+	local inner = {}
+	local r = radius - thickness
+	for deg=startang, endang, step do
+		local rad = deg2rad * deg
+		table.insert(inner, {
+			x=cx+(math.cos(rad)*r),
+			y=cy+(math.sin(rad)*r)
+		})
+	end
+
+	local outer = {}
+	for deg=startang, endang, step do
+		local rad = deg2rad * deg
+		table.insert(outer, {
+			x=cx+(math.cos(rad)*radius),
+			y=cy+(math.sin(rad)*radius)
+		})
+	end
+
+	for tri=1,#inner*2 do
+		local p1,p2,p3
+		p1 = outer[math.floor(tri/2)+1]
+		p3 = inner[math.floor((tri+1)/2)+1]
+		if tri%2 == 0 then
+			p2 = outer[math.floor((tri+1)/2)]
+		else
+			p2 = inner[math.floor((tri+1)/2)]
+		end
+	
+		table.insert(triarc, {p1,p2,p3})
+	end
+	return triarc
+end
+
+function simfphys.LFS.DrawArc(cx,cy,radius,thickness,startang,endang,roughness,color,bClockwise)
+	surface.SetDrawColor(color)
+	draw.NoTexture()
+
+	for k,v in ipairs( PrecacheArc(cx,cy,radius,thickness,startang,endang,roughness,bClockwise) ) do
+		surface.DrawPoly(v)
+	end
+end
+
+function simfphys.LFS.DrawCircle( X, Y, radius )
+	local segmentdist = 360 / ( 2 * math.pi * radius / 2 )
+	
+	for a = 0, 360, segmentdist do
+		surface.DrawLine( X + math.cos( math.rad( a ) ) * radius, Y - math.sin( math.rad( a ) ) * radius, X + math.cos( math.rad( a + segmentdist ) ) * radius, Y - math.sin( math.rad( a + segmentdist ) ) * radius )
+	end
+end
+
+function simfphys.LFS.DrawDiamond( X, Y, radius, perc )
+	if perc <= 0 then return end
+
+	local segmentdist = 90
+
+	draw.NoTexture()
+
+	for a = 90, 360, segmentdist do
+		local Xa = math.Round( math.sin( math.rad( -a ) ) * radius, 0 )
+		local Ya = math.Round( math.cos( math.rad( -a ) ) * radius, 0 )
+
+		local C = math.sqrt( radius ^ 2 + radius ^ 2 )
+
+		if a == 90 then
+			C = C * math.min(math.max(perc - 0.75,0) / 0.25,1)
+		elseif a == 180 then
+			C = C * math.min(math.max(perc - 0.5,0) / 0.25,1)
+		elseif a == 270 then
+			C = C * math.min(math.max(perc - 0.25,0) / 0.25,1)
+		elseif a == 360 then
+			C = C * math.min(math.max(perc,0) / 0.25,1)
+		end
+
+		if C > 0 then
+			local AxisMoveX = math.Round( math.sin( math.rad( -a + 135) ) * (C + 3) * 0.5, 0 )
+			local AxisMoveY =math.Round( math.cos( math.rad( -a + 135) ) * (C + 3) * 0.5, 0 )
+
+			surface.DrawTexturedRectRotated(X - Xa - AxisMoveX, Y - Ya - AxisMoveY,3, math.ceil( C ), a - 45)
+		end
+	end
+end
+

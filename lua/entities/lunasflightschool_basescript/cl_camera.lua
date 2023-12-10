@@ -26,6 +26,10 @@ function ENT:CalcViewMouseAim( ply, pos, angles, fov, pod )
 	view.drawviewer = true
 	view.angles = (self:GetForward() * (1 + cvarFocus) * self._lvsSmoothFreeLook * 0.8 + ply:EyeAngles():Forward() * math.max(1 - cvarFocus, 1 - self._lvsSmoothFreeLook)):Angle()
 
+	if self:GetDriverSeat() ~= pod then
+		view.angles = ply:EyeAngles()
+	end
+
 	if cvarFocus >= 1 then
 		view.angles = LerpAngle( self._lvsSmoothFreeLook, ply:EyeAngles(), self:GetAngles() )
 	else

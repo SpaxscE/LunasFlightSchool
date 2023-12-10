@@ -82,7 +82,11 @@ end
 function ENT:LVSHudPaint( X, Y, ply )
 	if not self:LVSPreHudPaint( X, Y, ply ) then return end
 
-	if ply ~= self:GetDriver() then return end
+	if ply ~= self:GetDriver() then
+		self:LFSHudPaintPassenger( X, Y, ply )
+
+		return
+	end
 
 	local HitPlane = self:GetEyeTrace( true ).HitPos:ToScreen()
 	local HitPilot = self:GetEyeTrace().HitPos:ToScreen()
@@ -94,6 +98,10 @@ function ENT:LVSHudPaint( X, Y, ply )
 	self:LFSHudPaintCrosshair( HitPlane, HitPilot )
 	self:LFSHudPaintInfoLine( HitPlane, HitPilot, LFS_TIME_NOTIFY, Dir, Len, LocalPlayer():lvsKeyDown( "FREELOOK" ) )
 	self:LFSPaintHitMarker( HitPilot )
+end
+
+function ENT:LFSHudPaintPassenger( X, Y, ply )
+	self:LFSPaintHitMarker( {x = X * 0.5, y = Y * 0.5} )
 end
 
 function ENT:LFSHudPaintInfoLine( HitPlane, HitPilot, LFS_TIME_NOTIFY, Dir, Len, FREELOOK )

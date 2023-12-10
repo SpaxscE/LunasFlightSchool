@@ -1006,7 +1006,13 @@ function ENT:InitWheels()
 end
 
 function ENT:InitPod()
-	return self:AddDriverSeat( self.SeatPos,  self.SeatAng )
+	local Pod = self:AddDriverSeat( self.SeatPos,  self.SeatAng )
+
+	if self.HideDriver then
+		Pod.HidePlayer = true
+	end
+
+	return Pod
 end
 
 function ENT:dOwner( eEnt )
