@@ -1,9 +1,7 @@
---DO NOT EDIT OR REUPLOAD THIS FILE
-
 AddCSLuaFile()
 
-SWEP.Category			= "Other"
-SWEP.PrintName		= "[LFS] Missile Launcher"
+SWEP.Category			= "[LVS]"
+SWEP.PrintName		= "[LVS] Missile Launcher"
 SWEP.Author			= "Luna"
 SWEP.Slot				= 4
 SWEP.SlotPos			= 9
@@ -84,17 +82,7 @@ function SWEP:Think()
 		self.nextFind = curtime + 3
 		self.FoundVehicles = {}
 		
-		for k, v in pairs( simfphys.LFS:PlanesGetAll() ) do
-			if v.LFS then
-				table.insert( self.FoundVehicles, v )
-			end
-		end
-		
-		for k, v in pairs( ents.FindByClass( "wac_hc*" ) ) do
-			table.insert( self.FoundVehicles, v )
-		end
-		
-		for k, v in pairs( ents.FindByClass( "wac_pl*" ) ) do
+		for k, v in pairs( LVS:GetVehicles() ) do
 			table.insert( self.FoundVehicles, v )
 		end
 	end
@@ -148,9 +136,11 @@ function SWEP:Think()
 			self.FindTime = curtime
 			
 			if IsValid( ClosestEnt ) then
-				self.TrackSND = CreateSound(self.Owner, "lfs/radar_track.wav")
-				self.TrackSND:PlayEx( 0, 100 )
-				self.TrackSND:ChangeVolume( 0.5, 2 )
+				if not self.TrackSND then
+					self.TrackSND = CreateSound(self.Owner, "lfs/radar_track.wav")
+					self.TrackSND:PlayEx( 0, 100 )
+					self.TrackSND:ChangeVolume( 0.5, 2 )
+				end
 			else
 				if self.TrackSND then
 					self.TrackSND:Stop()
@@ -251,15 +241,19 @@ function SWEP:StopSounds()
 		self.TrackSND:Stop()
 		self.TrackSND = nil
 	end
-	
+
 	if self.LockSND then
 		self.LockSND:Stop()
 		self.LockSND = nil
 	end
-	
+
 	self:SetClosestEnt( NULL )
 	self:SetClosestDist( 99999999999999 )
 	self:SetIsLocked( false )
+end
+
+function SWEP:OnRemoved()
+	self:StopSounds()
 end
 
 function SWEP:Holster()
@@ -280,11 +274,11 @@ local AllPlanes = {}
 local function PaintPlaneIdentifier( ply )
 	if NextFind < CurTime() then
 		NextFind = CurTime() + 3
-		AllPlanes = simfphys.LFS:PlanesGetAll()
+		AllPlanes = LVS:GetVehicles()
 	end
 
 	local MyPos = ply:GetPos()
-	local MyTeam = ply:lfsGetAITeam()
+	local MyTeam = ply:lvsGetAITeam()
 	local startpos = ply:GetShootPos()
 
 	for _, v in pairs( AllPlanes ) do
@@ -313,7 +307,9 @@ local function PaintPlaneIdentifier( ply )
 						end
 					end
 
-					simfphys.LFS.HudPaintPlaneIdentifier( Pos.x, Pos.y, IndicatorColor, v )
+					surface.SetDrawColor( IndicatorColor )
+
+					LVS:DrawDiamond( Pos.x, Pos.y, 30, 1 )
 				end
 			end
 		end
