@@ -138,6 +138,8 @@ hook.Add( "PreRegisterSENT", "!!!lfs_to_lvs", function( ent, class )
 end )
 
 if SERVER then
+	resource.AddWorkshop("3111031938")
+
 	util.AddNetworkString( "lfs_failstartnotify" )
 	util.AddNetworkString( "lfs_hitmarker" )
 	util.AddNetworkString( "lfs_killmarker" )
