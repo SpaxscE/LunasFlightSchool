@@ -547,6 +547,12 @@ end
 
 DEFINE_BASECLASS( "lvs_base" )
 
+function ENT:OnDriverChanged( Old, New, VehicleIsActive )
+	if not IsValid( new ) then return end
+
+	self:AlignView( New )
+end
+
 function ENT:HandleActive()
 	local gPod = self:GetGunnerSeat()
 
@@ -555,6 +561,7 @@ function ENT:HandleActive()
 
 		if Gunner ~= self:GetGunner() then
 			self:SetGunner( Gunner )
+			self:AlignView( Gunner )
 		end
 	end
 

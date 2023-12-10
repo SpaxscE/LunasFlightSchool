@@ -76,6 +76,13 @@ function ENT:SetupDataTables()
 
 	if SERVER then
 		self:ReloadWeapon()
+
+		-- failsave for vehicles that overwrite ENT:Initialize() such as the ATTE
+		timer.Simple( 1, function()
+			if not IsValid( self ) then return end
+
+			self:SetlvsReady( true )
+		end )
 	end
 end
 
