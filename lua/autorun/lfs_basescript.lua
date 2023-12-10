@@ -2,7 +2,7 @@
 simfphys = istable( simfphys ) and simfphys or {}
 simfphys.LFS = istable( simfphys.LFS ) and simfphys.LFS or {}
 
-simfphys.LFS.VERSION = 310
+simfphys.LFS.VERSION = 311
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 function simfphys.LFS.GetVersion()
@@ -106,7 +106,7 @@ hook.Add( "PreRegisterSENT", "!!!lfs_to_lvs", function( ent, class )
 
 	local Base = ent.Base or ""
 
-	if not string.StartsWith( class, "lunasflightschool_" ) and not string.StartsWith( class, "lfs_" ) and not string.StartsWith( Base:lower(), "lunasflightschool_basescript" ) then return end
+	if not string.StartsWith( class, "lunasflightschool_" ) and not string.StartsWith( class, "lfs_" ) and not string.StartsWith( Base:lower(), "lunasflightschool_basescript" ) and not string.StartsWith( Base:lower(), "lunasflightschool_atte" ) then return end
 
 	local Variants = {
 		[1] = "[LFS] - ",
