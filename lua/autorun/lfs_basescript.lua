@@ -2,7 +2,7 @@
 simfphys = istable( simfphys ) and simfphys or {}
 simfphys.LFS = istable( simfphys.LFS ) and simfphys.LFS or {}
 
-simfphys.LFS.VERSION = 311
+simfphys.LFS.VERSION = 312
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 function simfphys.LFS.GetVersion()
