@@ -5,6 +5,33 @@ simfphys.LFS = {}
 simfphys.LFS.VERSION = 310
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
+function simfphys.LFS.GetVersion()
+	return simfphys.LFS.VERSION
+end
+
+function simfphys.LFS.CheckUpdates()
+	http.Fetch("https://raw.githubusercontent.com/Blu-x92/LunasFlightSchool/master/lua/autorun/lfs_basescript.lua", function(contents,size) 
+		local LatestVersion = tonumber( string.match( string.match( contents, "simfphys.LFS.VERSION%s=%s%d+" ) , "%d+" ) ) or 0
+
+		if LatestVersion == 0 then
+			print("[LFS] latest version could not be detected, You have Version: "..simfphys.LFS.GetVersion())
+		else
+			if simfphys.LFS.GetVersion() >= LatestVersion then
+				print("[LFS] is up to date, Version: "..simfphys.LFS.GetVersion())
+			else
+				print("[LFS] a newer version is available! Version: "..LatestVersion..", You have Version: "..simfphys.LFS.GetVersion())
+				print("[LFS] get the latest version at https://github.com/Blu-x92/LunasFlightSchool")
+				
+				if CLIENT then 
+					timer.Simple(18, function() 
+						chat.AddText( Color( 255, 0, 0 ), "[LFS] a newer version is available!" )
+					end)
+				end
+			end
+		end
+	end)
+end
+
 hook.Add( "LVS:Initialize", "[LFS] - Initialize", function()
 	simfphys.LFS.FreezeTeams = GetConVar( "lvs_freeze_teams" )
 	simfphys.LFS.TeamPassenger = GetConVar( "lvs_teampassenger" )
@@ -12,6 +39,8 @@ hook.Add( "LVS:Initialize", "[LFS] - Initialize", function()
 
 	simfphys.LFS.IgnoreNPCs = LVS.IgnoreNPCs
 	simfphys.LFS.IgnorePlayers = LVS.IgnorePlayers
+
+	simfphys.LFS.CheckUpdates()
 end )
 
 local meta = FindMetaTable( "Player" )
