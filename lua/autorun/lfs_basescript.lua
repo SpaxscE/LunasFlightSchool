@@ -92,7 +92,7 @@ function meta:lfsGetInput( name )
 
 	local Pressed = self:KeyDown( KEYS[ name ] )
 
-	local NewPressed = hook.Run( "LFS.PlayerKeyDown", self, name, Pressed )
+	local NewPressed = hook.Run( "LVS.PlayerKeyDown", self, name, Pressed )
 
 	if isbool( NewPressed ) then
 		return NewPressed
