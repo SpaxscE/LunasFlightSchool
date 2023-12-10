@@ -79,12 +79,38 @@ end )
 
 if SERVER then
 	util.AddNetworkString( "lfs_failstartnotify" )
+	util.AddNetworkString( "lfs_hitmarker" )
+	util.AddNetworkString( "lfs_killmarker" )
 
 	return
 end
 
 list.Set( "ContentCategoryIcons", "[LVS] - Flight School", "icon16/lfs.png" )
 list.Set( "ContentCategoryIcons", "[LFS]", "icon16/lfs.png" )
+
+net.Receive( "lfs_hitmarker", function( len )
+	if not LVS.ShowHitMarker then return end
+
+	local ply = LocalPlayer()
+
+	local vehicle = ply:lvsGetVehicle()
+
+	if not IsValid( vehicle ) then return end
+
+	vehicle:HitMarker()
+end )
+
+net.Receive( "lfs_killmarker", function( len )
+	if not LVS.ShowHitMarker then return end
+
+	local ply = LocalPlayer()
+
+	local vehicle = ply:lvsGetVehicle()
+
+	if not IsValid( vehicle ) then return end
+
+	vehicle:KillMarker()
+end )
 
 LFS_TIME_NOTIFY = 0
 net.Receive( "lfs_failstartnotify", function( len )

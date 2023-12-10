@@ -1286,6 +1286,16 @@ function ENT:AITargetInfront( ent, range )
 	return InFront
 end
 
+function ENT:CanRechargeShield()
+	return self:CanShieldRecharge()
+end
+
+function ENT:SetNextShieldRecharge( nDelay )
+	if not isnumber( nDelay ) then return end
+	
+	self:DelayNextShieldRecharge( nDelay )
+end
+
 DEFINE_BASECLASS( "lvs_base" )
 
 function ENT:WeaponRestoreAmmo()
