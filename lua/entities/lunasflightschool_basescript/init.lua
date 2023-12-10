@@ -860,6 +860,7 @@ function ENT:InitWheels()
 				wheel_L:SetNoDraw( true )
 				wheel_L:DrawShadow( false )
 				wheel_L.DoNotDuplicate = true
+				wheel_L:AddEFlags( EFL_NO_PHYSCANNON_INTERACTION )
 				
 				local radius = self.WheelRadius
 				
@@ -908,6 +909,7 @@ function ENT:InitWheels()
 				wheel_R:SetNoDraw( true )
 				wheel_R:DrawShadow( false )
 				wheel_R.DoNotDuplicate = true
+				wheel_R:AddEFlags( EFL_NO_PHYSCANNON_INTERACTION )
 				
 				local radius = self.WheelRadius
 				
@@ -979,6 +981,7 @@ function ENT:InitWheels()
 					wheel_C:SetNoDraw( true )
 					wheel_C:DrawShadow( false )
 					wheel_C.DoNotDuplicate = true
+					wheel_C:AddEFlags( EFL_NO_PHYSCANNON_INTERACTION )
 					
 					local radius = self.WheelRadius
 					
