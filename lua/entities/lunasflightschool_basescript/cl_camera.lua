@@ -11,12 +11,11 @@ function ENT:LFSCalcViewThirdPerson( view, ply )
 	return view
 end
 
-ENT._lvsSmoothFreeLook = 0
-
+local smTran = 0
 function ENT:CalcViewMouseAim( ply, pos, angles, fov, pod )
 	local cvarFocus = math.Clamp( LVS.cvarCamFocus:GetFloat() , -1, 1 )
 
-	self._lvsSmoothFreeLook = self._lvsSmoothFreeLook + ((ply:lvsKeyDown( "FREELOOK" ) and 0 or 1) - self._lvsSmoothFreeLook) * RealFrameTime() * 10
+	smTran = smTran + ((ply:lfsGetInput( "FREELOOK" ) and 0 or 1) - smTran) * FrameTime() * 10
 
 	self.ZoomFov = fov
 
@@ -24,29 +23,29 @@ function ENT:CalcViewMouseAim( ply, pos, angles, fov, pod )
 	view.origin = pos
 	view.fov = fov
 	view.drawviewer = true
-	view.angles = (self:GetForward() * (1 + cvarFocus) * self._lvsSmoothFreeLook * 0.8 + ply:EyeAngles():Forward() * math.max(1 - cvarFocus, 1 - self._lvsSmoothFreeLook)):Angle()
-
-	if self:GetDriverSeat() ~= pod then
-		view.angles = ply:EyeAngles()
-	end
+	view.angles = (self:GetForward() * (1 + cvarFocus) * smTran * 0.8 + ply:EyeAngles():Forward() * math.max(1 - cvarFocus, 1 - smTran)):Angle()
 
 	if cvarFocus >= 1 then
-		view.angles = LerpAngle( self._lvsSmoothFreeLook, ply:EyeAngles(), self:GetAngles() )
+		view.angles = LerpAngle( smTran, ply:EyeAngles(), self:GetAngles() )
 	else
 		view.angles.r = 0
 	end
 
+	if self:GetDriverSeat() ~= pod then
+		view.angles = ply:EyeAngles()
+	end
+	
 	if not pod:GetThirdPersonMode() then
-
+		
 		view.drawviewer = false
-
+		
 		return self:LFSCalcViewFirstPerson( view, ply )
 	end
-
+	
 	local radius = 550
 	radius = radius + radius * pod:GetCameraDistance()
-
-	local TargetOrigin = view.origin - view.angles:Forward() * radius  + view.angles:Up() * (radius * 0.2 + radius * pod:GetCameraHeight())
+	
+	local TargetOrigin = view.origin - view.angles:Forward() * radius  + view.angles:Up() * radius * 0.2
 	local WallOffset = 4
 
 	local tr = util.TraceHull( {
@@ -61,9 +60,9 @@ function ENT:CalcViewMouseAim( ply, pos, angles, fov, pod )
 		mins = Vector( -WallOffset, -WallOffset, -WallOffset ),
 		maxs = Vector( WallOffset, WallOffset, WallOffset ),
 	} )
-
+	
 	view.origin = tr.HitPos
-
+	
 	if tr.Hit and not tr.StartSolid then
 		view.origin = view.origin + tr.HitNormal * WallOffset
 	end

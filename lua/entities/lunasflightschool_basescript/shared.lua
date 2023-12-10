@@ -15,6 +15,8 @@ ENT.RenderGroup = RENDERGROUP_BOTH
 
 ENT.MDL = "error.mdl"
 
+ENT.LFS = true
+
 ENT.AITEAM = 0
 
 ENT.Mass = 2000

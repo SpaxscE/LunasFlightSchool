@@ -1,6 +1,6 @@
 
 simfphys = istable( simfphys ) and simfphys or {}
-simfphys.LFS = {}
+simfphys.LFS = istable( simfphys.LFS ) and simfphys.LFS or {}
 
 simfphys.LFS.VERSION = 310
 simfphys.LFS.VERSION_TYPE = ".GIT"
@@ -31,6 +31,18 @@ function simfphys.LFS.CheckUpdates()
 		end
 	end)
 end
+
+-- this is for addons that do some hackery to fix pod=>vehicle detection
+hook.Add( "OnEntityCreated", "!!lfs_fix_bullshit", function( ent )
+	timer.Simple(1, function()
+		if not IsValid( ent ) then return end
+
+		if ent.LFSchecked then
+			ent.LVSchecked = true
+			ent.LVSBaseEnt = ent.LFSBaseEnt 
+		end
+	end )
+end )
 
 hook.Add( "LVS:Initialize", "[LFS] - Initialize", function()
 	simfphys.LFS.FreezeTeams = GetConVar( "lvs_freeze_teams" )
@@ -69,6 +81,10 @@ end
 
 function meta:lfsGetAITeam()
 	return self:lvsGetAITeam()
+end
+
+function meta:lfsSetAITeam( team )
+	self:lvsSetAITeam( team )
 end
 
 function meta:lfsGetInput( name )
