@@ -40,7 +40,9 @@ hook.Add( "LVS:Initialize", "[LFS] - Initialize", function()
 	simfphys.LFS.IgnoreNPCs = LVS.IgnoreNPCs
 	simfphys.LFS.IgnorePlayers = LVS.IgnorePlayers
 
-	simfphys.LFS.CheckUpdates()
+	timer.Simple(20, function()
+		simfphys.LFS.CheckUpdates()
+	end)
 end )
 
 local meta = FindMetaTable( "Player" )
@@ -72,7 +74,15 @@ end
 function meta:lfsGetInput( name )
 	if not KEYS[ name ] then return false end
 
-	return self:KeyDown( KEYS[ name ] )
+	local Pressed = self:KeyDown( KEYS[ name ] )
+
+	local NewPressed = hook.Run( "LFS.PlayerKeyDown", self, name, Pressed )
+
+	if isbool( NewPressed ) then
+		return NewPressed
+	else
+		return Pressed
+	end
 end
 
 hook.Add( "PreRegisterSENT", "!!!lfs_to_lvs", function( ent, class )
