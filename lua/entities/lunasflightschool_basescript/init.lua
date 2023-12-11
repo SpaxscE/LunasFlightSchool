@@ -1071,23 +1071,9 @@ function ENT:GetAngVel()
 	return Angle( vec.y, vec.z, vec.x )
 end
 
-function ENT:PreExplode( ExplodeTime )
-	self:Destroy()
-
-	self:OnStartExplosion()
-
-	local PhysObj = self:GetPhysicsObject()
-
-	if not IsValid( PhysObj ) then return 0 end
-
-	self:OnStartFireTrail( PhysObj, ExplodeTime )
-
-	return self:IsSpaceShip() and (math.Clamp((self:GetVelocity():Length() - 250) / 500,1.5,8) * math.Rand(0.2,1)) or (self:GetAI() and 30 or 9999)
-end
-
 function ENT:Destroy()
 	self.Destroyed = true
-	
+
 	local PObj = self:GetPhysicsObject()
 	if IsValid( PObj ) then
 		PObj:SetDragCoefficient( -20 )
@@ -1313,6 +1299,12 @@ function ENT:SetNextShieldRecharge( nDelay )
 end
 
 DEFINE_BASECLASS( "lvs_base" )
+
+function ENT:SetDestroyed( SuppressOnDestroy )
+	BaseClass.SetDestroyed( self, SuppressOnDestroy )
+
+	self:Destroy()
+end
 
 function ENT:WeaponRestoreAmmo()
 	self:ReloadWeapon()
