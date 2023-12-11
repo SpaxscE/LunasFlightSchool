@@ -662,7 +662,7 @@ function ENT:ToggleEngine()
 end
 
 function ENT:IsEngineStartAllowed()
-	if hook.Run( "LFS.IsEngineStartAllowed", self ) == false then return false end
+	if hook.Run( "LVS.IsEngineStartAllowed", self ) == false then return false end
 
 	local Driver = self:GetDriver()
 	local Pod = self:GetDriverSeat()
