@@ -76,12 +76,13 @@ function ENT:SetupDataTables()
 	self:AddDT( "Int", "AmmoPrimary", { KeyName = "primaryammo", Edit = { type = "Int", order = 3,min = 0, max = self.MaxPrimaryAmmo, category = "Weapons"} } )
 	self:AddDT( "Int", "AmmoSecondary", { KeyName = "secondaryammo", Edit = { type = "Int", order = 4,min = 0, max = self.MaxSecondaryAmmo, category = "Weapons"} } )
 
+	-- lets hope LFS devs sticked to the "no lower than index 10" rule
 	self:AddDataTables()
 
 	if SERVER then
 		self:ReloadWeapon()
 
-		-- failsave for vehicles that overwrite ENT:Initialize() such as the ATTE
+		-- failsafe for vehicles that overwrite ENT:Initialize() such as the ATTE which dont call PostInitialize since that function didnt exist back then
 		timer.Simple( 1, function()
 			if not IsValid( self ) then return end
 
@@ -89,6 +90,7 @@ function ENT:SetupDataTables()
 		end )
 	end
 
+	-- workaround for invasive addons such as gredwitch base so they can not find us in OnEntityCreated
 	timer.Simple( 1, function()
 		if not IsValid( self ) then return end
 
@@ -102,12 +104,6 @@ end
 
 function ENT:SetlfsLockedStatus( lock )
 	return self:SetlvsLockedStatus( lock )
-end
-
-function ENT:CalcMainActivity( ply )
-end
-
-function ENT:StartCommand( ply, cmd )
 end
 
 function ENT:AddDataTables()
