@@ -15,7 +15,7 @@ ENT.RenderGroup = RENDERGROUP_BOTH
 
 ENT.MDL = "error.mdl"
 
-ENT.LFS = true
+ENT.LVSlfs = true
 
 ENT.AITEAM = 0
 
@@ -84,6 +84,8 @@ function ENT:SetupDataTables()
 			if not IsValid( self ) then return end
 
 			self:SetlvsReady( true )
+
+			self.LFS = true
 		end )
 	end
 end

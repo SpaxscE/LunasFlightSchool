@@ -2,7 +2,7 @@
 simfphys = istable( simfphys ) and simfphys or {}
 simfphys.LFS = istable( simfphys.LFS ) and simfphys.LFS or {}
 
-simfphys.LFS.VERSION = 313
+simfphys.LFS.VERSION = 314
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 function simfphys.LFS.GetVersion()
@@ -149,7 +149,7 @@ end
 
 local LFSSoundList = {}
 hook.Add( "EntityEmitSound", "!!!lfs_volumemanager", function( t )
-	if t.Entity.LFS then
+	if t.Entity.LVSlfs then
 		local SoundFile = t.SoundName
 
 		if LFSSoundList[ SoundFile ] == true then

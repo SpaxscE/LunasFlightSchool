@@ -30,7 +30,12 @@ function ENT:Initialize()
 	
 	self:InitPod()
 	self:InitWheels()
-	self:RunOnSpawn()
+
+	local SpawnSuccess, ErrorMsg = pcall( function() self:RunOnSpawn() end )
+
+	if not SpawnSuccess then
+		ErrorNoHalt( "\n[ERROR] "..ErrorMsg.."\n\n" )
+	end
 	
 	self.Inertia = self.LFSInertiaDefault
 	self:SetIsGroundTouching( true )
