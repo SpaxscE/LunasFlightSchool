@@ -84,10 +84,14 @@ function ENT:SetupDataTables()
 			if not IsValid( self ) then return end
 
 			self:SetlvsReady( true )
-
-			self.LFS = true
 		end )
 	end
+
+	timer.Simple( 1, function()
+		if not IsValid( self ) then return end
+
+		self.LFS = true
+	end )
 end
 
 function ENT:GetlfsLockedStatus()
