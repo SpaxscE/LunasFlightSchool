@@ -13,6 +13,15 @@ function ENT:Think()
 	
 	self:ExhaustFX()
 	self:DamageFX()
+
+	if not self:IsInitialized() then return end
+ 
+	if self:HandleActive() then
+		self:OnFrameActive()
+	end
+
+	self:HandleTrail()
+	self:OnFrame()
 end
 
 function ENT:DamageFX()
@@ -40,6 +49,13 @@ function ENT:EngineActiveChanged( bActive )
 end
 
 function ENT:OnRemove()
+	self:StopEmitter()
+	self:StopWindSounds()
+	self:StopFlyBy()
+	self:StopDeathSound()
+
+	self:OnRemoved()
+
 	self:SoundStop()
 end
 
