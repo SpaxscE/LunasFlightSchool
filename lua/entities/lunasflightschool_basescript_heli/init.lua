@@ -12,8 +12,9 @@ function ENT:CalcFlight()
 		
 		return
 	end
-	
-	self:CheckRotorClearance()
+
+	--self:CheckRotorClearance()
+	self:CheckRotorCollision()
 	
 	local MaxTurnSpeed = self:GetMaxTurnSpeedHeli()
 	local MaxPitch = MaxTurnSpeed.p
@@ -212,7 +213,7 @@ function ENT:OnRotorCollide( Pos, Dir )
 	self:EmitSound( "ambient/materials/roust_crash"..math.random(1,2)..".wav" )
 end
 
-function ENT:CheckRotorClearance()
+function ENT:CheckRotorCollision()
 	if self.BreakRotor then
 		if self.BreakRotor ~= self:GetRotorDestroyed() then
 			self:SetRotorDestroyed( self.BreakRotor )
@@ -221,30 +222,25 @@ function ENT:CheckRotorClearance()
 		
 		return
 	end
-	
+
 	local angUp = self:GetRotorAngle()
 	local Up = angUp:Up()
 	local Forward = angUp
 	Forward:RotateAroundAxis( Up, -CurTime() * 2000 )
 	Forward = Forward:Forward()
-	
+
 	local position = self:GetRotorPos()
 
 	local tr = util.TraceLine( {
 		start = position,
 		endpos = (position + Forward * self:GetRotorRadius()),
-		filter = function( ent ) 
-			if ent == self or ent:IsPlayer() then 
-				return false
-			end
-			
-			return true
-		end
+		filter = self:GetCrosshairFilterEnts(),
+		mask = MASK_SOLID_BRUSHONLY,
 	} )
-	
+
 	self.RotorHitCount = self.RotorHitCount or 0
-	
-	if tr.Hit then
+
+	if tr.Hit and not tr.HitSky then
 		self.RotorHit = true
 		
 		self.RotorHitCount = self.RotorHitCount + 1
@@ -253,9 +249,11 @@ function ENT:CheckRotorClearance()
 		
 		self.RotorHitCount = math.max(self.RotorHitCount - 1 * FrameTime(),0)
 	end
-	
-	if self.RotorHitCount > 20 then
-		self.BreakRotor = true
+
+	if not self.CheckRotorClearance then
+		if self.RotorHitCount > 20 then
+			self.BreakRotor = true
+		end
 	end
 	
 	if self.RotorHit ~= self.oldRotorHit then
