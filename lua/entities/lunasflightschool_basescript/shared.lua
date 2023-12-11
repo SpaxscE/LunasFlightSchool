@@ -54,6 +54,8 @@ ENT.MaxSecondaryAmmo = -1
 ENT.MaintenanceTime = 8
 ENT.MaintenanceRepairAmount = 250
 
+ENT.SpawnNormalOffset = 50
+
 function ENT:SetupDataTables()
 	self:CreateBaseDT()
 
