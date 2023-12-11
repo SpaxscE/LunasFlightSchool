@@ -98,6 +98,11 @@ function ENT:LVSHudPaint( X, Y, ply )
 	self:LFSHudPaintCrosshair( HitPlane, HitPilot )
 	self:LFSHudPaintInfoLine( HitPlane, HitPilot, LFS_TIME_NOTIFY, Dir, Len, LocalPlayer():lvsKeyDown( "FREELOOK" ) )
 	self:LFSPaintHitMarker( HitPilot )
+
+	self:LVSHudPaintHelicopter( X, Y, ply, HitPilot )
+end
+
+function ENT:LVSHudPaintHelicopter( X, Y, ply, HitPilot )
 end
 
 function ENT:LFSHudPaintPassenger( X, Y, ply )
