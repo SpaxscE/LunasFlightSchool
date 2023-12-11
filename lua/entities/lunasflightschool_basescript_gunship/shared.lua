@@ -32,3 +32,7 @@ ENT.MaxThrustVtol = 400
 function ENT:IsGunship()
 	return true
 end
+
+function ENT:GetVehicleType()
+	return "gunship"
+end

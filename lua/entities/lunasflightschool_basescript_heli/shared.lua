@@ -50,3 +50,7 @@ end
 function ENT:IsHelicopter()
 	return true
 end
+
+function ENT:GetVehicleType()
+	return "helicopter"
+end
