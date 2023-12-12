@@ -273,46 +273,45 @@ end
 
 function ENT:RunAI()
 	local RangerLength = 15000
-	
+
 	local mySpeed = self:GetVelocity():Length()
 	local myPos = self:GetPos()
 	local myRadius = self:BoundingRadius() 
 	local myDir = self:GetForward()
-	
+
 	local MinDist = 1500 + mySpeed
-	local StartPos = self:GetPos()
-	
+	local StartPos = self:LocalToWorld( self:OBBCenter() )
+
 	local FrontLeft = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(0,20,0) ):Forward() * RangerLength } )
 	local FrontRight = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(0,-20,0) ):Forward() * RangerLength } )
-	
+
 	local FrontLeft2 = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(25,65,0) ):Forward() * RangerLength } )
 	local FrontRight2 = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(25,-65,0) ):Forward() * RangerLength } )
-	
+
 	local FrontLeft3 = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(-25,65,0) ):Forward() * RangerLength } )
 	local FrontRight3 = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(-25,-65,0) ):Forward() * RangerLength } )
-	
+
 	local FrontUp = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(-20,0,0) ):Forward() * RangerLength } )
 	local FrontDown = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:LocalToWorldAngles( Angle(20,0,0) ):Forward() * RangerLength } )
 
 	local Up = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos + self:GetUp() * RangerLength } )
 	local Down = util.TraceLine( { start = StartPos, filter = self, endpos = StartPos - self:GetUp() * RangerLength } )
-	
+
 	local Down2 = util.TraceLine( { start = self:LocalToWorld( Vector(0,0,100) ), filter = self, endpos = StartPos + Vector(0,0,-RangerLength) } )
-	
+
 	local cAvoid = Vector(0,0,0)
-	if istable( self.FoundPlanes ) then
-		for _, v in pairs( self.FoundPlanes ) do
-			if IsValid( v ) and v ~= self and v.LFS then
-				local theirRadius = v:BoundingRadius() 
-				local Sub = (myPos - v:GetPos())
-				local Dir = Sub:GetNormalized()
-				local Dist = Sub:Length()
-				
-				if Dist < (theirRadius + myRadius + 200) then
-					if math.deg( math.acos( math.Clamp( myDir:Dot( -Dir ) ,-1,1) ) ) < 90 then
-						cAvoid = cAvoid + Dir * (theirRadius + myRadius + 500)
-					end
-				end
+
+	for _, v in pairs( LVS:GetVehicles() ) do
+		if v == self then continue end
+
+		local theirRadius = v:BoundingRadius() 
+		local Sub = (myPos - v:GetPos())
+		local Dir = Sub:GetNormalized()
+		local Dist = Sub:Length()
+		
+		if Dist < (theirRadius + myRadius + 200) then
+			if math.deg( math.acos( math.Clamp( myDir:Dot( -Dir ) ,-1,1) ) ) < 90 then
+				cAvoid = cAvoid + Dir * (theirRadius + myRadius + 500)
 			end
 		end
 	end
@@ -335,29 +334,22 @@ function ENT:RunAI()
 	local TargetPos = (FLp+FRp+FL2p+FR2p+FL3p+FR3p+FUp+FDp+Up+Dp) / 10
 	
 	local alt = (myPos - Down2.HitPos):Length()
-	
+
+	self._AIFireInput = false
+
 	if alt < 600 then 
 		TargetPos.z = myPos.z + 2000
 	else
 		local Target = self:AIGetTarget()
-		
+
 		if IsValid( Target ) then
 			local HisRadius = Target:BoundingRadius() 
 			local HisPos = Target:GetPos() + Vector(0,0,600)
-			
+
 			TargetPos = HisPos + (myPos - HisPos):GetNormalized() * (myRadius + HisRadius + 500) + cAvoid * 8
-			
-			local startpos =  self:GetRotorPos()
-			local tr = util.TraceHull( {
-				start = startpos,
-				endpos = (startpos + self:GetForward() * 50000),
-				mins = Vector( -30, -30, -30 ),
-				maxs = Vector( 30, 30, 30 ),
-				filter = self
-			} )
 		end
 	end
-	
+
 	return TargetPos
 end
 
