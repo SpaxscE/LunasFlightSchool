@@ -1,28 +1,28 @@
 function ENT:LFSHudPaintInfoText( X, Y, speed, alt, AmmoPrimary, AmmoSecondary, Throttle )
 	local Col = Throttle <= 100 and Color(255,255,255,255) or Color(255,0,0,255)
 
-	draw.SimpleText( "THR", "LFS_FONT", 10, 10, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-	draw.SimpleText( Throttle.."%" , "LFS_FONT", 120, 10, Col, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+	draw.SimpleText( "THR", "LFS_FONT", X + 10, Y + 10, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+	draw.SimpleText( Throttle.."%" , "LFS_FONT", X + 120, Y + 10, Col, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
 
-	draw.SimpleText( "IAS", "LFS_FONT", 10, 35, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-	draw.SimpleText( speed.."km/h", "LFS_FONT", 120, 35, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+	draw.SimpleText( "IAS", "LFS_FONT", X + 10, Y + 35, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+	draw.SimpleText( speed.."km/h", "LFS_FONT", X + 120, Y + 35, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
 
-	draw.SimpleText( "ALT", "LFS_FONT", 10, 60, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-	draw.SimpleText( alt.."m" , "LFS_FONT", 120, 60, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+	draw.SimpleText( "ALT", "LFS_FONT", X + 10, Y + 60, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+	draw.SimpleText( alt.."m" , "LFS_FONT", X + 120, Y + 60, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
 
 	if self:GetMaxAmmoPrimary() > -1 then
-		draw.SimpleText( "PRI", "LFS_FONT", 10, 85, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-		draw.SimpleText( AmmoPrimary, "LFS_FONT", 120, 85, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+		draw.SimpleText( "PRI", "LFS_FONT", X + 10, Y + 85, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+		draw.SimpleText( AmmoPrimary, "LFS_FONT", X + 120, Y + 85, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
 	end
 
 	if self:GetMaxAmmoSecondary() > -1 then
-		draw.SimpleText( "SEC", "LFS_FONT", 10, 110, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
-		draw.SimpleText( AmmoSecondary, "LFS_FONT", 120, 110, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+		draw.SimpleText( "SEC", "LFS_FONT", X + 10, Y + 110, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
+		draw.SimpleText( AmmoSecondary, "LFS_FONT", X + 120, Y + 110, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP )
 	end
 end
 
 local AltitudeMinZ = 0
-LVS:AddHudEditor( "lfshud",  ScrW(), ScrH(),  220, 75, 220, 75, "LFS Info Text",
+LVS:AddHudEditor( "LFS_HUD_INFO_TEXT",  0, 0,  220, 75, 220, 75, "LFS Info Text",
 	function( self, vehicle, X, Y, W, H, ScrX, ScrY, ply )
 		if not vehicle.LFSHudPaintInfoText then return end
 
