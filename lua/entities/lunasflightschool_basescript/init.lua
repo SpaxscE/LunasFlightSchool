@@ -350,8 +350,8 @@ function ENT:Think()
 
 	self:HandleLandingGear()
 	self:HandleWeapons()
-	self:HandleEngine()
 	self:CalcFlight()
+	self:HandleEngine()
 
 	-- lvs
 	self:ShieldThink()
