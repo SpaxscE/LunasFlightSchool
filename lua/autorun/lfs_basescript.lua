@@ -2,8 +2,22 @@
 simfphys = istable( simfphys ) and simfphys or {}
 simfphys.LFS = istable( simfphys.LFS ) and simfphys.LFS or {}
 
-simfphys.LFS.VERSION = 321
+simfphys.LFS.VERSION = 322
 simfphys.LFS.VERSION_TYPE = ".GIT"
+
+local KEYS = {}
+
+function simfphys.LFS:AddKey(name, class, name_menu, default, cmd, IN_KEY)
+	local Key = {
+		name = name,
+		category = "LFS",
+		name_menu = name_menu,
+		default = default,
+		cmd = cmd
+	}
+
+	table.insert( KEYS,  Key )
+end
 
 function simfphys.LFS.GetVersion()
 	return simfphys.LFS.VERSION
@@ -55,6 +69,10 @@ hook.Add( "LVS:Initialize", "[LFS] - Initialize", function()
 	timer.Simple(20, function()
 		simfphys.LFS.CheckUpdates()
 	end)
+
+	for _, v in pairs( KEYS ) do
+		LVS:AddKey( v.name, v.category, v.name_menu, v.cmd, v.default )
+	end
 end )
 
 local meta = FindMetaTable( "Player" )
@@ -88,7 +106,9 @@ function meta:lfsSetAITeam( team )
 end
 
 function meta:lfsGetInput( name )
-	if not KEYS[ name ] then return false end
+	if not KEYS[ name ] then
+		return self:lvsKeyDown( name )
+	end
 
 	local Pressed = self:KeyDown( KEYS[ name ] )
 
