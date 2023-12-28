@@ -56,6 +56,8 @@ ENT.MaintenanceRepairAmount = 250
 
 ENT.SpawnNormalOffset = 50
 
+ENT.lvsDisableZoom = false
+
 function ENT:SetupDataTables()
 	self:CreateBaseDT()
 

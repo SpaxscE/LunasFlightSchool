@@ -2,7 +2,7 @@
 simfphys = istable( simfphys ) and simfphys or {}
 simfphys.LFS = istable( simfphys.LFS ) and simfphys.LFS or {}
 
-simfphys.LFS.VERSION = 322
+simfphys.LFS.VERSION = 323
 simfphys.LFS.VERSION_TYPE = ".GIT"
 
 local KEYS = {}
