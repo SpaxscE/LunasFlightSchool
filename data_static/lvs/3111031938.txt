@@ -1,3 +1,3 @@
 name=LunasFlightSchool
-version=286
-url=https://github.com/SpaxscE/LunasFlightSchool/blob/master/data_static/lvs/3111031938.txt
+version=287
+url=https://raw.githubusercontent.com/SpaxscE/LunasFlightSchool/master/data_static/lvs/3111031938.txt
