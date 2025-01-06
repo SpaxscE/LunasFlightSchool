@@ -9,7 +9,12 @@ if SERVER then
 		self:SetMoveType( MOVETYPE_VPHYSICS )
 		self:SetSolid( SOLID_VPHYSICS )
 		self:SetUseType( SIMPLE_USE )
-		self:AddFlags( FL_OBJECT ) -- this allows npcs to see this entity
+
+		-- this is so vj npcs can still see us
+		self:AddEFlags( EFL_DONTBLOCKLOS )
+
+		-- this is for our npc relationship system to work
+		self:AddFlags( FL_OBJECT )
 	end
 
 	function ENT:Use( ply )
