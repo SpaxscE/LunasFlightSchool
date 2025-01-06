@@ -10,7 +10,12 @@ function ENT:Initialize()
 	self:SetSolid( SOLID_VPHYSICS )
 	self:SetUseType( SIMPLE_USE )
 	self:SetRenderMode( RENDERMODE_TRANSALPHA )
-	self:AddFlags( FL_OBJECT ) -- this allows npcs to see this entity
+
+	-- this is so vj npcs can still see us
+	self:AddEFlags( EFL_DONTBLOCKLOS )
+
+	-- this if for our npc relationship system to work
+	self:AddFlags( FL_OBJECT )
 	
 	local PObj = self:GetPhysicsObject()
 	
